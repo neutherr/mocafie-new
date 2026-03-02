@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocafie - Tepung Mocaf Premium</title>
+    <meta name="description" content="Tepung Mocafie: Tepung singkong modifikasi bebas gluten, kaya mineral, dan serat. Pilihan sehat untuk keluarga Anda.">
+    <link rel="icon" type="image/svg+xml" href="assets/img/logo.svg">
+    <link rel="icon" type="image/png" href="assets/img/logopng.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/3/3.1.0/iconify.min.js" defer></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2D5A27', // Green
+                        accent: '#8B4513', // Brown
+                        surface: '#FAFAF9', // Warm White
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom image placeholder styles */
+        .img-placeholder-container {
+            position: relative;
+            background-color: #f3f4f6;
+            background-image: linear-gradient(135deg, #e5e7eb 25%, transparent 25%), 
+                              linear-gradient(225deg, #e5e7eb 25%, transparent 25%), 
+                              linear-gradient(45deg, #e5e7eb 25%, transparent 25%), 
+                              linear-gradient(315deg, #e5e7eb 25%, transparent 25%);
+            background-position: 10px 0, 10px 0, 0 0, 0 0;
+            background-size: 20px 20px;
+            background-repeat: repeat;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .img-placeholder-text {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(45, 90, 39, 0.8); /* Primary color with opacity */
+            color: white;
+            font-size: 0.875rem;
+            text-align: center;
+            padding: 1rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+        }
+
+        .img-placeholder-container:hover .img-placeholder-text, 
+        .img-missing .img-placeholder-text {
+            opacity: 1;
+        }
+
+        /* Show placeholder text if image fails to load (simulated with class) */
+        img:not([src]), img[src=""] {
+            display: none;
+        }
+        
+        /* Scroll Animation Utilities */
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        
+        .animate-on-scroll.appear {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .delay-100 { transition-delay: 150ms; }
+        .delay-200 { transition-delay: 300ms; }
+        .delay-300 { transition-delay: 450ms; }
+
+        .gallery-item {
+            /* Width handled by Tailwind utility now */
+            flex-shrink: 0;
+            border-radius: 1rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="font-sans text-gray-800 bg-white antialiased">
+
+    <!-- Sticky Navbar -->
+    <nav class="fixed w-full z-50 bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center">
+                    <a href="#">
+                        <img src="assets/img/logopng.webp" alt="Mocafie Logo" width="128" height="128" fetchpriority="high" class="h-32 w-auto">
+                    </a>
+                </div>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="#home" class="text-gray-600 hover:text-primary transition-colors font-medium">Home</a>
+                    <a href="#produk" class="text-gray-600 hover:text-primary transition-colors font-medium">Produk Kami</a>
+                    <a href="#tentang" class="text-gray-600 hover:text-primary transition-colors font-medium">Tentang Kami</a>
+                    <a href="#galeri" class="text-gray-600 hover:text-primary transition-colors font-medium">Galeri Kami</a>
+                    <a href="#resep" class="text-gray-600 hover:text-primary transition-colors font-medium">Resep</a>
+                    <a href="#kontak" class="text-gray-600 hover:text-primary transition-colors font-medium">Hubungi Kami</a>
+                    <a href="belanja/index.html" target="_blank" rel="noopener noreferrer" class="bg-primary hover:bg-green-800 text-white px-5 py-2.5 rounded-full font-medium transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                        Belanja
+                    </a>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center">
+                    <button aria-label="Toggle mobile menu" class="mobile-menu-button p-2 rounded-md text-gray-600 hover:text-primary hover:bg-gray-100 focus:outline-none transition-colors duration-200">
+                        <!-- Hamburger Icon -->
+                        <svg class="hamburger-icon h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                        <!-- Close Icon (Hidden by default) -->
+                        <svg class="close-icon h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div class="mobile-menu hidden md:hidden bg-white border-t">
+            <a href="#home" class="block py-3 px-6 text-sm hover:bg-surface hover:text-primary">Home</a>
+            <a href="#produk" class="block py-3 px-6 text-sm hover:bg-surface hover:text-primary">Produk Kami</a>
+            <a href="#tentang" class="block py-3 px-6 text-sm hover:bg-surface hover:text-primary">Tentang Kami</a>
+            <a href="#galeri" class="block py-3 px-6 text-sm hover:bg-surface hover:text-primary">Galeri Kami</a>
+            <a href="#resep" class="block py-3 px-6 text-sm hover:bg-surface hover:text-primary">Resep</a>
+            <a href="#kontak" class="block py-3 px-6 text-sm hover:bg-surface hover:text-primary">Hubungi Kami</a>
+            <div class="p-4">
+                <a href="belanja/index.html" target="_blank" class="block text-center bg-primary text-white py-3 rounded-lg font-medium">Belanja</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+    <!-- Hero Section -->
+    <section id="home" class="relative pt-32 pb-20 lg:pt-40 lg:pb-32 overflow-hidden bg-surface">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
+                <div class="lg:w-1/2 text-center lg:text-left space-y-6 animate-on-scroll">
+                    <span class="inline-block px-4 py-1.5 rounded-full bg-green-100 text-primary font-semibold text-sm tracking-wide mb-2">100% Bebas Gluten & Alami</span>
+                    <h1 class="font-serif text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
+                        100% Sehat Dari <span class="text-primary">Bumi</span>
+                    </h1>
+                    <p class="text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+                        Mocafie menghadirkan tepung singkong modifikasi premium yang lebih putih, halus, dan kaya nutrisi. Solusi tepat untuk diet bebas gluten tanpa mengorbankan rasa.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
+                        <button onclick="openCheckoutModal()" class="bg-primary hover:bg-green-800 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 text-center">
+                            Pesan Sekarang
+                        </button>
+                        <a href="#produk" class="bg-white border-2 border-primary text-primary hover:bg-green-50 px-8 py-4 rounded-full font-semibold text-lg transition-all text-center">
+                            Lihat Produk
+                        </a>
+                    </div>
+                </div>
+                <div class="lg:w-1/2 w-full">
+                    <!-- Image Placeholder: Hero -->
+                    <!-- Ganti gambar di: assets/img/hero-flour.jpg -->
+                    <div class="img-placeholder-container aspect-square md:aspect-[4/3] rounded-3xl shadow-2xl border-4 border-white transform rotate-2 hover:rotate-0 transition-transform duration-500 animate-on-scroll delay-200">
+                        <img src="assets/img/hero-flour.webp" alt="Mocafie Flour Hero" width="800" height="800" fetchpriority="high" class="w-full h-full object-cover" onerror="this.style.display='none';this.parentElement.classList.add('img-missing')">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Decorative background elements -->
+        <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-green-100 rounded-full blur-3xl opacity-50"></div>
+        <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-orange-50 rounded-full blur-3xl opacity-50"></div>
+    </section>
+
+    <!-- Produk Kami -->
+    <section id="produk" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="font-serif text-3xl md:text-4xl font-bold text-gray-900 mb-4 animate-on-scroll">Produk Kami</h2>
+                <div class="w-20 h-1 bg-accent mx-auto rounded-full mb-6"></div>
+                <p class="text-gray-600 text-lg">
+                    Tepung Mocaf (Modified Cassava Flour) berkualitas tinggi yang diproses melalui fermentasi alami bakteri asam laktat.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <!-- Product Image -->
+                <div class="order-2 md:order-1">
+                    <div class="img-placeholder-container aspect-[3/4] rounded-2xl shadow-xl overflow-hidden group animate-on-scroll">
+                        <img src="assets/img/product-pack.webp" alt="Kemasan Mocafie" width="600" height="800" loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" onerror="this.style.display='none';this.parentElement.classList.add('img-missing')">
+                    </div>
+                </div>
+
+                <!-- Product Details -->
+                <div class="order-1 md:order-2 space-y-8">
+                    <h3 class="font-serif text-3xl font-bold text-primary">Tepung Mocafie Serbaguna</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Tepung singkong fermentasi yang memiliki karakteristik mirip terigu namun bebas gluten. Warna lebih putih, aroma netral (tidak berbau apek singkong), dan tekstur lebih halus.
+                    </p>
+                    
+                    <div class="bg-surface p-6 rounded-xl border border-gray-100">
+                        <h4 class="font-semibold text-gray-900 mb-4 flex items-center">
+                            <svg class="w-5 h-5 text-accent mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            Keunggulan Utama
+                        </h4>
+                        <ul class="space-y-3 text-gray-600">
+                            <li class="flex items-start">
+                                <span class="text-primary mr-2">•</span> Lebih kaya Kalsium & Fosfor dibanding gandum
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary mr-2">•</span> Daya kembang setara gandum tipe protein rendah-sedang
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary mr-2">•</span> Mudah dicerna & aman untuk pencernaan sensitif
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 class="font-semibold text-gray-900 mb-3">Cocok Digunakan Untuk:</h4>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="px-3 py-1 bg-green-50 text-primary text-sm rounded-full font-medium">Cookies</span>
+                            <span class="px-3 py-1 bg-green-50 text-primary text-sm rounded-full font-medium">Cake</span>
+                            <span class="px-3 py-1 bg-green-50 text-primary text-sm rounded-full font-medium">Brownies</span>
+                            <span class="px-3 py-1 bg-green-50 text-primary text-sm rounded-full font-medium">Gorengan</span>
+                            <span class="px-3 py-1 bg-green-50 text-primary text-sm rounded-full font-medium">Mie</span>
+                            <span class="px-3 py-1 bg-green-50 text-primary text-sm rounded-full font-medium">Pastry</span>
+                        </div>
+                        <button onclick="openCheckoutModal()" class="bg-primary hover:bg-green-800 text-white px-8 py-3.5 rounded-xl font-semibold text-lg transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 w-full sm:w-auto flex items-center justify-center sm:inline-flex gap-2">
+                            <span class="iconify text-xl" data-icon="mdi:cart-outline"></span>
+                            Beli Sekarang
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Proses Produksi -->
+    <section id="proses" class="py-20 bg-primary overflow-hidden relative">
+        <div class="absolute inset-0 bg-black/10"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center mb-16 px-4">
+                <h2 class="font-serif text-3xl md:text-4xl font-bold text-white mb-4">Proses Produksi</h2>
+                <div class="w-20 h-1 bg-white/50 mx-auto rounded-full mb-6"></div>
+                <p class="text-white/90 text-lg max-w-2xl mx-auto">
+                    Menjaga kualitas dari ladang hingga ke tangan Anda dengan proses higienis dan terstandar.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- Step 1 -->
+                <div class="relative group">
+                    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 h-full hover:bg-white/20 transition-all">
+                        <div class="text-4xl font-serif font-bold text-white/50 absolute top-4 right-4">01</div>
+                        <div class="text-3xl mb-4">
+                            <span class="iconify" data-icon="mdi:sprout"></span>
+                        </div>
+                        <h3 class="font-semibold text-xl text-white mb-2">Panen Selektif</h3>
+                        <p class="text-white/80 text-sm">
+                            Singkong segar dipanen langsung dari petani mitra dan dipilih kualitas terbaiknya.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="relative group">
+                    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 h-full hover:bg-white/20 transition-all">
+                        <div class="text-4xl font-serif font-bold text-white/50 absolute top-4 right-4">02</div>
+                        <div class="text-3xl mb-4">
+                            <span class="iconify" data-icon="mdi:flask"></span>
+                        </div>
+                        <h3 class="font-semibold text-xl text-white mb-2">Fermentasi</h3>
+                        <p class="text-white/80 text-sm">
+                            Direndam dengan bakteri asam laktat selama 10 jam - 3 hari untuk menghilangkan zat anti-nutrisi.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="relative group">
+                    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 h-full hover:bg-white/20 transition-all">
+                        <div class="text-4xl font-serif font-bold text-white/50 absolute top-4 right-4">03</div>
+                        <div class="text-3xl mb-4">
+                            <span class="iconify" data-icon="mdi:weather-sunny"></span>
+                        </div>
+                        <h3 class="font-semibold text-xl text-white mb-2">Pengeringan</h3>
+                        <p class="text-white/80 text-sm">
+                            Chip singkong dikeringkan hingga kadar air optimal untuk menjamin keawetan alami.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="relative group">
+                    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 h-full hover:bg-white/20 transition-all">
+                        <div class="text-4xl font-serif font-bold text-white/50 absolute top-4 right-4">04</div>
+                        <div class="text-3xl mb-4">
+                            <span class="iconify" data-icon="mdi:factory"></span>
+                        </div>
+                        <h3 class="font-semibold text-xl text-white mb-2">Penepungan</h3>
+                        <p class="text-white/80 text-sm">
+                            Digiling halus dan diayak untuk menghasilkan tekstur tepung yang lembut dan putih bersih.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tentang Kami -->
+    <section id="tentang" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row items-center gap-12">
+                <div class="md:w-1/2">
+                    <!-- Image Placeholder: About Us -->
+                    <!-- Ganti gambar di: assets/img/about-farmer.jpg -->
+                    <div class="img-placeholder-container aspect-video rounded-2xl shadow-lg transform md:-rotate-2 border-4 border-surface overflow-hidden">
+                        <img
+                            src="assets/img/tentangkami.jpeg"
+                            alt="Petani Singkong Lokal"
+                            class="w-full h-full object-cover object-[50%_30%]"
+                            onerror="this.style.display='none';this.parentElement.classList.add('img-missing')"
+                        >
+                    </div>
+                </div>
+                <div class="md:w-1/2 space-y-6">
+                    <span class="text-accent font-semibold tracking-wider uppercase text-sm">Cerita Kami</span>
+                    <h2 class="font-serif text-3xl md:text-4xl font-bold text-gray-900">Memberdayakan Petani, Menyehatkan Negeri</h2>
+                    <p class="text-gray-600 leading-relaxed text-lg">
+                        Mocafie hadir dari kepedulian terhadap potensi singkong lokal Indonesia. Kami bekerjasama langsung dengan petani lokal untuk memproduksi tepung singkong berkualitas dunia.
+                    </p>
+                    <p class="text-gray-600 leading-relaxed">
+                        Misi kami sederhana, Menyediakan alternatif tepung gandum yang lebih sehat, halal, dan aman untuk semua orang, sekaligus meningkatkan kesejahteraan petani singkong lokal.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Perizinan & Sertifikasi (Requested Section) -->
+    <section class="py-16 bg-surface border-y border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-10">
+                <h3 class="font-serif text-2xl font-bold text-gray-900">Standar Kualitas & Keamanan</h3>
+                <p class="text-gray-500 mt-2">Produk kami telah tersertifikasi dan memenuhi standar keamanan pangan internasional.</p>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                <!-- Halal -->
+                <div class="flex flex-col items-center justify-center p-6 bg-white rounded-xl shadow-sm border border-gray-100 hover:border-primary/30 transition-colors">
+                    <div class="w-24 h-24 flex items-center justify-center mb-3">
+                        <img src="assets/img/halal-logo.jpg" alt="Halal Logo" class="w-full h-full object-contain">
+                    </div>
+                    <span class="font-bold text-gray-800">HALAL</span>
+                    <span class="text-xs text-gray-500 text-center mt-1">Sertifikasi Halal MUI</span>
+                </div>
+
+                <!-- BPOM -->
+                <div class="flex flex-col items-center justify-center p-6 bg-white rounded-xl shadow-sm border border-gray-100 hover:border-primary/30 transition-colors">
+                    <div class="w-24 h-24 flex items-center justify-center mb-3">
+                        <img src="assets/img/bpom-logo.png" alt="BPOM Logo" class="w-full h-full object-contain">
+                    </div>
+                    <span class="font-bold text-gray-800">BPOM RI</span>
+                    <span class="text-xs text-gray-500 text-center mt-1">Izin Edar Resmi</span>
+                </div>
+
+                <!-- HACCP -->
+                <div class="flex flex-col items-center justify-center p-6 bg-white rounded-xl shadow-sm border border-gray-100 hover:border-primary/30 transition-colors">
+                    <div class="w-24 h-24 flex items-center justify-center mb-3">
+                        <img src="assets/img/haccp-logo.png" alt="HACCP Logo" class="w-full h-full object-contain">
+                    </div>
+                    <span class="font-bold text-gray-800">HACCP</span>
+                    <span class="text-xs text-gray-500 text-center mt-1">Hazard Analysis Critical Control Point</span>
+                </div>
+
+                <!-- ISO -->
+                <div class="flex flex-col items-center justify-center p-6 bg-white rounded-xl shadow-sm border border-gray-100 hover:border-primary/30 transition-colors">
+                    <div class="w-24 h-24 flex items-center justify-center mb-3">
+                        <img src="assets/img/iso-logo.png" alt="ISO Logo" class="w-full h-full object-contain">
+                    </div>
+                    <span class="font-bold text-gray-800">ISO</span>
+                    <span class="text-xs text-gray-500 text-center mt-1">Standardisasi Internasional</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+<!-- Galeri Kami -->
+<section id="galeri" class="py-20 bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center max-w-3xl mx-auto mb-12">
+      <h2 class="font-serif text-3xl md:text-4xl font-bold text-gray-900 mb-4">Galeri Kami</h2>
+      <div class="w-20 h-1 bg-accent mx-auto rounded-full mb-6"></div>
+      <p class="text-gray-600 text-lg">Inspirasi olahan dan momen terbaik bersama Mocafie.</p>
+    </div>
+
+    <!-- Slider Wrapper -->
+    <div class="relative group">
+      <!-- Prev/Next -->
+      <button
+        id="galleryPrev"
+        type="button"
+        aria-label="Sebelumnya"
+        class="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white text-primary p-3 rounded-full shadow-lg backdrop-blur-sm transition-all
+               opacity-100 md:opacity-0 md:group-hover:opacity-100 disabled:opacity-30 focus:outline-none
+               translate-x-2 md:translate-x-0"
+      >
+        <span class="iconify text-2xl" data-icon="mdi:chevron-left"></span>
+      </button>
+
+      <button
+        id="galleryNext"
+        type="button"
+        aria-label="Berikutnya"
+        class="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white text-primary p-3 rounded-full shadow-lg backdrop-blur-sm transition-all
+               opacity-100 md:opacity-0 md:group-hover:opacity-100 disabled:opacity-30 focus:outline-none
+               -translate-x-2 md:translate-x-0"
+      >
+        <span class="iconify text-2xl" data-icon="mdi:chevron-right"></span>
+      </button>
+
+      <!-- Viewport (NO overflow-x-auto) -->
+      <div
+        id="galleryViewport"
+        class="overflow-hidden"
+        style="touch-action: pan-y pinch-zoom;"
+      >
+        <!-- Track (translateX controlled by JS) -->
+        <div
+          id="galleryTrack"
+          class="flex -mx-3 transition-transform duration-500 ease-out will-change-transform"
+        >
+          <!-- SLIDE 1: Jamur Crispy Image -->
+          <div class="gallery-slide w-full sm:w-1/2 lg:w-1/3 shrink-0 px-3">
+            <div class="gallery-item aspect-[3/4] rounded-2xl overflow-hidden relative shadow-md">
+              <div class="img-placeholder-container w-full h-full">
+                <img
+                  src="assets/img/jamurcrispy.jpeg"
+                  alt="Jamur Crispy Mocafie"
+                  class="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
+                  loading="lazy"
+                />
+                <div class="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/70 to-transparent">
+                  <p class="text-white font-bold text-lg">Jamur Crispy</p>
+                  <p class="text-white/80 text-sm">Gurih & Renyah</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SLIDE 2: Jamur Crispy Video -->
+          <div class="gallery-slide w-full sm:w-1/2 lg:w-1/3 shrink-0 px-3">
+            <div class="gallery-item aspect-[3/4] rounded-2xl overflow-hidden relative shadow-md bg-gray-900">
+              <div class="img-placeholder-container w-full h-full">
+                <video class="w-full h-full object-cover" controls playsinline loop muted poster="assets/img/jamurcrispy.jpeg">
+                  <source src="assets/img/jamurcrispyvideo.mp4" type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+                <div class="absolute top-4 right-4 bg-black/50 text-white rounded-full p-2 backdrop-blur-sm pointer-events-none">
+                  <span class="iconify text-xl" data-icon="mdi:video"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SLIDE 3: Nastar Image -->
+          <div class="gallery-slide w-full sm:w-1/2 lg:w-1/3 shrink-0 px-3">
+            <div class="gallery-item aspect-[3/4] rounded-2xl overflow-hidden relative shadow-md">
+              <div class="img-placeholder-container w-full h-full">
+                <img
+                  src="assets/img/nastar.jpeg"
+                  alt="Nastar Mocafie"
+                  class="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
+                  loading="lazy"
+                />
+                <div class="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/70 to-transparent">
+                  <p class="text-white font-bold text-lg">Nastar Premium</p>
+                  <p class="text-white/80 text-sm">Lembut & Lumer</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SLIDE 4: Nastar Video -->
+          <div class="gallery-slide w-full sm:w-1/2 lg:w-1/3 shrink-0 px-3">
+            <div class="gallery-item aspect-[3/4] rounded-2xl overflow-hidden relative shadow-md bg-gray-900">
+              <div class="img-placeholder-container w-full h-full">
+                <video class="w-full h-full object-cover" controls playsinline loop muted poster="assets/img/nastar.jpeg">
+                  <source src="assets/img/nastarvideo.mp4" type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+                <div class="absolute top-4 right-4 bg-black/50 text-white rounded-full p-2 backdrop-blur-sm pointer-events-none">
+                  <span class="iconify text-xl" data-icon="mdi:video"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SLIDE 5: Cake Image -->
+          <div class="gallery-slide w-full sm:w-1/2 lg:w-1/3 shrink-0 px-3">
+            <div class="gallery-item aspect-[3/4] rounded-2xl overflow-hidden relative shadow-md">
+              <div class="img-placeholder-container w-full h-full">
+                <img
+                  src="assets/img/cake.jpg"
+                  alt="Nastar Mocafie"
+                  class="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
+                  loading="lazy"
+                />
+                <div class="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/70 to-transparent">
+                  <p class="text-white font-bold text-lg">Cup Cake</p>
+                  <p class="text-white/80 text-sm">Moist & Lumer</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+                    <!-- SLIDE 6: Noodle Image -->
+          <div class="gallery-slide w-full sm:w-1/2 lg:w-1/3 shrink-0 px-3">
+            <div class="gallery-item aspect-[3/4] rounded-2xl overflow-hidden relative shadow-md">
+              <div class="img-placeholder-container w-full h-full">
+                <img
+                  src="assets/img/noodle.jpg"
+                  alt="Nastar Mocafie"
+                  class="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
+                  loading="lazy"
+                />
+                <div class="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/70 to-transparent">
+                  <p class="text-white font-bold text-lg">Fried Noodle</p>
+                  <p class="text-white/80 text-sm">Gurih & Lezat</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          
+
+        </div>
+      </div>
+
+      <!-- Dots -->
+      <div id="galleryDots" class="flex items-center justify-center gap-2 mt-6"></div>
+    </div>
+  </div>
+</section>
+
+    <!-- Testimoni / Customer Stories -->
+    <section class="py-12 bg-surface">
+        <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
+            <span class="text-primary font-semibold tracking-wider uppercase text-sm animate-on-scroll">Testimoni Customer</span>
+            <h2 class="font-serif text-3xl md:text-4xl font-bold text-gray-900 mb-4 animate-on-scroll delay-100">Apa Kata Mereka?</h2>
+            <div class="w-20 h-1 bg-accent mx-auto rounded-full mb-6"></div>
+            <p class="text-gray-600 text-lg animate-on-scroll delay-200">Bukan cuma janji, ribuan orang sudah merasakan bedanya. Saatnya kamu juga beralih ke yang lebih sehat.</p>
+        </div>
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div id="testimoniSlider" class="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-8 scrollbar-hide">
+                <!-- Testimoni 1 -->
+                <div class="snap-center shrink-0 w-full md:w-[85%] lg:w-[70%] bg-white rounded-3xl shadow-sm border border-gray-100 flex flex-col md:flex-row overflow-hidden hover:shadow-md transition-all duration-300 animate-on-scroll">
+                    <div class="w-full md:w-2/5 h-64 md:h-auto shrink-0 relative">
+                        <img alt="Mocafie Bag" class="absolute inset-0 w-full h-full object-cover" src="assets/img/testimoni1.jpeg"/>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent md:hidden"></div>
+                    </div>
+                    <div class="p-8 md:p-10 flex flex-col justify-center flex-grow">
+                        <blockquote class="font-serif text-2xl md:text-3xl leading-relaxed text-gray-900 mb-8 italic">
+                            "Momafié pic😍 beliau memang sudah biasa pakai tepung mocaf, dan happy ada tepung mocafié yang harganya bisa jauh lebih murah dari merk ternama, dengan kualitas premium💚 Alhamdulillaah..  buat yang mau dijual lagi juga harganya masih oke bgttt loh, silahkan japri ya"
+                        </blockquote>
+                        <div class="flex items-center justify-between mt-auto">
+                            <div>
+                                <div class="font-bold text-gray-900 text-lg">Dari Customer ke Reseller</div>
+                                <div class="flex items-center gap-1.5 mt-1">
+                                    <span class="iconify text-primary text-[18px]" data-icon="mdi:check-decagram"></span>
+                                    <span class="text-sm font-medium text-primary">Pembeli Terverifikasi</span>
+                                </div>
+                            </div>
+                            <span class="text-6xl text-gray-200 font-serif select-none leading-none">”</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Testimoni 2 -->
+                <div class="snap-center shrink-0 w-full md:w-[85%] lg:w-[70%] bg-white rounded-3xl shadow-sm border border-gray-100 flex flex-col md:flex-row overflow-hidden hover:shadow-md transition-all duration-300 animate-on-scroll delay-100">
+                    <div class="w-full md:w-2/5 h-64 md:h-auto shrink-0 relative">
+                        <img alt="Homemade Nuggets" class="absolute inset-0 w-full h-full object-cover" src="assets/img/testimoni2.jpeg"/>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent md:hidden"></div>
+                    </div>
+                    <div class="p-8 md:p-10 flex flex-col justify-center flex-grow">
+                        <blockquote class="font-serif text-2xl md:text-3xl leading-relaxed text-gray-900 mb-8 italic">
+                            "Info pak, coba bikin naget (biasanya pakai tepung kanji dan terigu juga) tapi ini full tepung mocaf tanpa campuran tepung lain2.. hasilnya kata istri sy lebih bagus (ga terlalu lembek dan lebih padat kenyal) cocok lah kalau buat naget..😁"
+                        </blockquote>
+                        <div class="flex items-center justify-between mt-auto">
+                            <div>
+                                <div class="font-bold text-gray-900 text-lg">Homemade Chef</div>
+                                <div class="flex items-center gap-1.5 mt-1">
+                                    <span class="iconify text-primary text-[18px]" data-icon="mdi:check-decagram"></span>
+                                    <span class="text-sm font-medium text-primary">Pembeli Terverifikasi</span>
+                                </div>
+                            </div>
+                            <span class="text-6xl text-gray-200 font-serif select-none leading-none">”</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Testimoni 3 -->
+                <div class="snap-center shrink-0 w-full md:w-[85%] lg:w-[70%] bg-white rounded-3xl shadow-sm border border-gray-100 flex flex-col md:flex-row overflow-hidden hover:shadow-md transition-all duration-300 animate-on-scroll delay-200">
+                    <div class="w-full md:w-2/5 h-64 md:h-auto shrink-0 relative">
+                        <img alt="Stuffed Tofu Recipe" class="absolute inset-0 w-full h-full object-cover" src="assets/img/testimoni3.jpeg"/>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent md:hidden"></div>
+                    </div>
+                    <div class="p-8 md:p-10 flex flex-col justify-center flex-grow">
+                        <blockquote class="font-serif text-2xl md:text-3xl leading-relaxed text-gray-900 mb-8 italic">
+                            "Reshare mba Maya💛 Ini Mbah mau eksekusi bikin tahu isi pake si mocaf. Tambahkan -+ 1 SDM tepung beras supaya tekstur agak keriuk. Kalo mau keriuk ala-ala tepung kriuk serbaguna boleh tambahkan t.tapioka, t.maizena, t.beras dan sedikit baking soda. Mulai aja dulu 1kg MOCAFIE di dapurmu."
+                        </blockquote>
+                        <div class="flex items-center justify-between mt-auto">
+                            <div>
+                                <div class="font-bold text-gray-900 text-lg">Healthy Food Enthusiast</div>
+                                <div class="flex items-center gap-1.5 mt-1">
+                                    <span class="iconify text-primary text-[18px]" data-icon="mdi:check-decagram"></span>
+                                    <span class="text-sm font-medium text-primary">Pembeli Terverifikasi</span>
+                                </div>
+                            </div>
+                            <span class="text-6xl text-gray-200 font-serif select-none leading-none">”</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex items-center justify-between max-w-[70%] mx-auto mt-6">
+                <button id="tsPrev" aria-label="Testimoni Sebelumnya" class="w-12 h-12 rounded-full border border-gray-200 hover:bg-gray-100 flex items-center justify-center transition-colors text-gray-500 focus:outline-none">
+                    <span class="iconify text-2xl" data-icon="mdi:arrow-left"></span>
+                </button>
+                <div class="flex gap-3" id="tsDots">
+                </div>
+                <button id="tsNext" aria-label="Testimoni Berikutnya" class="w-12 h-12 rounded-full bg-primary text-white hover:bg-green-800 flex items-center justify-center transition-colors shadow-lg shadow-primary/20 focus:outline-none">
+                    <span class="iconify text-2xl" data-icon="mdi:arrow-right"></span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Resep -->
+    <section id="resep" class="py-20 bg-white">
+        <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
+            <span class="text-primary font-semibold tracking-wider uppercase text-sm animate-on-scroll">Resep Pilihan</span>
+            <h2 class="font-serif text-3xl md:text-4xl font-bold text-gray-900 mb-4 animate-on-scroll delay-100">Kreasi Sehat Bersama Mocafie</h2>
+            <div class="w-20 h-1 bg-accent mx-auto rounded-full mb-6"></div>
+            <p class="text-gray-600 text-lg animate-on-scroll delay-200">Cara lezat dan mudah menikmati Mocafie di dapur Anda.</p>
+        </div>
+        <div class="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-12 scrollbar-hide scroll-smooth" id="recipeSlider">
+                <!-- Resep 1 -->
+                <a href="/resep/resep-nugget.html" class="snap-center shrink-0 w-[90%] md:w-[600px] lg:w-[700px] relative group cursor-pointer transition-transform duration-300 animate-on-scroll block">
+                    <div class="relative h-[450px] md:h-[500px] rounded-3xl overflow-hidden shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
+                        <div class="absolute inset-0 w-full md:w-[65%] h-full bg-gray-100">
+                            <img alt="Nugget Ayam Mocafie" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" src="/assets/img/resep-nugget-ayam-mocafie.jpeg"/>
+                            <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent md:hidden"></div>
+                        </div>
+                        <div class="absolute bottom-0 right-0 left-0 md:left-auto md:top-12 md:bottom-12 md:right-8 w-full md:w-[45%] bg-white rounded-b-3xl md:rounded-3xl p-6 md:p-8 shadow-xl flex flex-col justify-center z-10 border border-gray-100 group-hover:-translate-y-1 transition-transform duration-300">
+                            <div class="mb-4">
+                                <span class="bg-primary/10 text-primary text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">Camilan</span>
+                            </div>
+                            <h3 class="font-serif text-2xl md:text-3xl font-bold text-gray-900 mb-3">Nugget Ayam Mocafie</h3>
+                            <p class="text-gray-600 text-sm leading-relaxed mb-6">Pensaran dengan resep nugget ayam yang nikmat dan sehat? Pas untuk bekal keluarga, yuk cek resepnya!</p>
+                            <div class="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
+                                <div class="flex items-center gap-2 text-sm text-gray-500">
+                                    <span class="iconify text-lg" data-icon="mdi:clock-outline"></span>
+                                    <span>25 menit</span>
+                                </div>
+                                <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors text-gray-700">
+                                    <span class="iconify text-lg" data-icon="mdi:arrow-right"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                
+                <!-- Resep 2 -->
+                <a href="#" class="snap-center shrink-0 w-[90%] md:w-[600px] lg:w-[700px] relative group cursor-pointer transition-transform duration-300 animate-on-scroll delay-100 block">
+                    <div class="relative h-[450px] md:h-[500px] rounded-3xl overflow-hidden shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
+                        <div class="absolute inset-0 w-full md:w-[65%] h-full bg-gray-100">
+                            <img alt="Cassava Flour Pizza" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAW91oWC3g_kx2wGCH3SXMVhNRAPIRsvuIr2HN51t3QDAZmmjWjoP8iPW6sZHTbJxAGaw6phcymq867Hd-HeOgb1X9nlI211esGvHb1hwIrhybOUUC-uRKTNfg74MRKAn-iqfozLAtcWvGbLW9mjfLHCc02jgTBvll44EXuwETWb1IkpwFm_yL6YzjT9b1wf3_0u7gP4fGp7JdPvpP9hj15CEtC_mzJQqzgD77UvEMqPSYCEnIbMkBy2ep1zxC7GMInb4siswqE6gIh"/>
+                            <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent md:hidden"></div>
+                        </div>
+                        <div class="absolute bottom-0 right-0 left-0 md:left-auto md:top-12 md:bottom-12 md:right-8 w-full md:w-[45%] bg-white rounded-b-3xl md:rounded-3xl p-6 md:p-8 shadow-xl flex flex-col justify-center z-10 border border-gray-100 group-hover:-translate-y-1 transition-transform duration-300">
+                            <div class="mb-4">
+                                <span class="bg-primary/10 text-primary text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">Hidangan Utama</span>
+                            </div>
+                            <h3 class="font-serif text-2xl md:text-3xl font-bold text-gray-900 mb-3">Crispy Thin Crust Pizza</h3>
+                            <p class="text-gray-600 text-sm leading-relaxed mb-6">Nikmati pizza klasik dengan kulit renyah tanpa gluten, lezat dan disukai keluarga.</p>
+                            <div class="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
+                                <div class="flex items-center gap-2 text-sm text-gray-500">
+                                    <span class="iconify text-lg" data-icon="mdi:clock-outline"></span>
+                                    <span>45 menit</span>
+                                </div>
+                                <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors text-gray-700">
+                                    <span class="iconify text-lg" data-icon="mdi:arrow-right"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                
+                <!-- Resep 3 -->
+                <a href="#" class="snap-center shrink-0 w-[90%] md:w-[600px] lg:w-[700px] relative group cursor-pointer transition-transform duration-300 animate-on-scroll delay-200 block">
+                    <div class="relative h-[450px] md:h-[500px] rounded-3xl overflow-hidden shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
+                        <div class="absolute inset-0 w-full md:w-[65%] h-full bg-gray-100">
+                            <img alt="Chocolate Chip Cookies" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2zkaVL0PeR_9yCEG8nrBRZnnMMRZUEbh9ZXzr7NJY_cA_DjCKWQxeBGevfhAim3K-4dAC3WgQNOyNTHkTf015-LSYMS7Qxb8X0TY0tZ8-y2OA-FCo0lG2FEkLv3KDEqvEOrHzvVUw0jeAua-LCkqxQJgWZgjXFm22ZzsiKDJWOTCQgx8T5YrHlDX0sjKs_pbg8RUOzCnCelhICpOB0x-WeN2zlyC2ZT-OnuhRWdHjPlsqNi6lJD96GWsgh2A5hii1sFxNegCEv9zj"/>
+                            <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent md:hidden"></div>
+                        </div>
+                        <div class="absolute bottom-0 right-0 left-0 md:left-auto md:top-12 md:bottom-12 md:right-8 w-full md:w-[45%] bg-white rounded-b-3xl md:rounded-3xl p-6 md:p-8 shadow-xl flex flex-col justify-center z-10 border border-gray-100 group-hover:-translate-y-1 transition-transform duration-300">
+                            <div class="mb-4">
+                                <span class="bg-primary/10 text-primary text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">Pencuci Mulut</span>
+                            </div>
+                            <h3 class="font-serif text-2xl md:text-3xl font-bold text-gray-900 mb-3">Chewy Chocolate Cookies</h3>
+                            <p class="text-gray-600 text-sm leading-relaxed mb-6">Kue cokelat panggang yang super kenyal, penuh dengan pecahan cokelat bebas gluten.</p>
+                            <div class="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
+                                <div class="flex items-center gap-2 text-sm text-gray-500">
+                                    <span class="iconify text-lg" data-icon="mdi:clock-outline"></span>
+                                    <span>30 menit</span>
+                                </div>
+                                <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors text-gray-700">
+                                    <span class="iconify text-lg" data-icon="mdi:arrow-right"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            
+            <div class="flex items-center justify-between max-w-[70%] mx-auto mt-6">
+                <button id="rsPrev" aria-label="Resep Sebelumnya" class="w-12 h-12 rounded-full border border-gray-200 hover:bg-gray-100 flex items-center justify-center transition-colors text-gray-500 focus:outline-none">
+                    <span class="iconify text-2xl" data-icon="mdi:arrow-left"></span>
+                </button>
+                <div class="flex gap-3" id="rsDots">
+                </div>
+                <button id="rsNext" aria-label="Resep Berikutnya" class="w-12 h-12 rounded-full bg-primary text-white hover:bg-green-800 flex items-center justify-center transition-colors shadow-lg shadow-primary/20 focus:outline-none">
+                    <span class="iconify text-2xl" data-icon="mdi:arrow-right"></span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Hubungi Kami -->
+    <section id="kontak" class="py-20 bg-surface">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col md:flex-row">
+                <!-- Form Area -->
+                <div class="md:w-1/2 p-8 md:p-12">
+                    <span class="text-primary font-semibold tracking-wider uppercase text-sm">Hubungi Kami</span>
+                    <h2 class="font-serif text-3xl font-bold text-gray-900 mt-2 mb-6">Mulai Hidup Sehat Hari Ini</h2>
+                    <p class="text-gray-600 mb-8">
+                        Punya pertanyaan atau ingin memesan dalam jumlah besar? Isi formulir di bawah atau hubungi kami langsung via WhatsApp.
+                    </p>
+
+                    <form action="#" class="space-y-4" onsubmit="event.preventDefault(); alert('Terima kasih! Pesan Anda telah terkirim (Demo).');">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                            <input type="text" class="w-full rounded-lg border-gray-300 border p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="Nama Anda">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">No. WhatsApp / Telepon</label>
+                            <input type="tel" class="w-full rounded-lg border-gray-300 border p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="0812...">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Pesan</label>
+                            <textarea rows="4" class="w-full rounded-lg border-gray-300 border p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="Tulis pesan Anda disini..."></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-primary hover:bg-green-800 text-white font-bold py-3.5 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5">
+                            Kirim Pesan
+                        </button>
+                    </form>
+
+                    <div class="mt-8 pt-6 border-t border-gray-100">
+                        <p class="text-center text-gray-500 text-sm mb-4">Atau hubungi kami langsung:</p>
+                        <a href="https://wa.me/6285188789052" target="_blank" class="flex items-center justify-center gap-3 w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-3.5 rounded-lg shadow-md transition-colors">
+                            <span class="text-xl">
+                                <span class="iconify" data-icon="mdi:whatsapp"></span>
+                            </span>
+                            Chat via WhatsApp
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Info Area -->
+                <div class="md:w-1/2 bg-primary p-8 md:p-12 text-white flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-serif text-2xl font-bold mb-6">Informasi Kontak</h3>
+                        <div class="space-y-6">
+                            <div class="flex items-start gap-4">
+                                <div class="bg-white/20 p-2 rounded-lg">
+                                    <span class="iconify text-xl" data-icon="mdi:map-marker"></span>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-lg">Alamat</h4>
+                                    <p class="text-white/80 opacity-90">Ruko Griya Sawangan Indah No. R-11, Jl. H. Sulaiman, Bedahan, Sawangan, Depok.<br>Jawa Barat, Indonesia</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-4">
+                                <div class="bg-white/20 p-2 rounded-lg">
+                                    <span class="iconify text-xl" data-icon="mdi:email-outline"></span>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-lg">Email</h4>
+                                    <p class="text-white/80 opacity-90">marketing.mocafie@gmail.com</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-4">
+                                <div class="bg-white/20 p-2 rounded-lg">
+                                    <span class="iconify" data-icon="mdi:clock-outline"></span>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-lg">Jam Operasional</h4>
+                                    <p class="text-white/80 opacity-90">Senin - Jumat: 08.00 - 17.00<br>Sabtu: 08.00 - 14.00</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-10 rounded-xl overflow-hidden h-56 md:h-64 bg-white/10 border border-white/20">
+                        <iframe
+                            title="Lokasi Mocafie di Google Maps"
+                            class="w-full h-full block"
+                            src="https://maps.google.com/maps?q=Ruko%20Griya%20Sawangan%20Indah%20No.%20R-11,%20Jl.%20H.%20Sulaiman,%20Bedahan,%20Sawangan,%20Depok&t=&z=14&ie=UTF8&iwloc=&output=embed"
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade"
+                            style="border:0;"
+                            allowfullscreen
+                        ></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    </main>
+
+    <!-- Checkout Modal -->
+    <div id="checkoutModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity duration-300 opacity-0 px-4">
+        <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300 p-6 md:p-8 relative max-h-[90vh] overflow-y-auto">
+            <!-- Close Button -->
+            <button onclick="closeCheckoutModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full p-2 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            
+            <h3 class="font-serif text-2xl font-bold text-gray-900 mb-2">Form Pemesanan</h3>
+            <p class="text-gray-600 text-sm mb-6">Silakan lengkapi detail pesanan Anda untuk diproses ke WhatsApp Admin.</p>
+            
+            <form id="checkoutForm" class="space-y-4" onsubmit="processCheckout(event)">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap *</label>
+                    <input type="text" id="coName" required class="w-full rounded-lg border-gray-300 border px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="Nama Anda">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nomor WhatsApp *</label>
+                    <input type="tel" id="coPhone" required class="w-full rounded-lg border-gray-300 border px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="0812...">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Ukuran Kemasan *</label>
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-1">
+                        <label class="cursor-not-allowed group relative">
+                            <input type="radio" name="coSize" value="250gr (Rp 12.000)" class="peer sr-only" disabled>
+                            <div class="rounded-lg border border-gray-200 p-2 text-center bg-gray-50 opacity-60 peer-disabled:cursor-not-allowed transition-all relative overflow-hidden">
+                                <span class="font-semibold text-sm block line-through">250 gr</span>
+                                <span class="text-xs text-gray-500 block line-through">Rp 12.000</span>
+                                <div class="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <span class="text-red-500 font-bold text-xs">Habis</span>
+                                </div>
+                            </div>
+                        </label>
+                        <label class="cursor-not-allowed group relative">
+                            <input type="radio" name="coSize" value="500gr (Rp 22.000)" class="peer sr-only" disabled>
+                            <div class="rounded-lg border border-gray-200 p-2 text-center bg-gray-50 opacity-60 peer-disabled:cursor-not-allowed transition-all relative overflow-hidden">
+                                <span class="font-semibold text-sm block line-through">500 gr</span>
+                                <span class="text-xs text-gray-500 block line-through">Rp 22.000</span>
+                                <div class="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <span class="text-red-500 font-bold text-xs">Habis</span>
+                                </div>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="coSize" value="1kg (Rp 40.000)" class="peer sr-only" required checked>
+                            <div class="rounded-lg border border-gray-200 p-2 text-center peer-checked:bg-primary/10 peer-checked:border-primary peer-checked:text-primary hover:bg-gray-50 transition-all">
+                                <span class="font-semibold text-sm block">1 kg</span>
+                                <span class="text-xs text-gray-500 block">Rp 40.000</span>
+                            </div>
+                        </label>
+                        <label class="cursor-not-allowed group relative">
+                            <input type="radio" name="coSize" value="2kg (Rp 75.000)" class="peer sr-only" disabled>
+                            <div class="rounded-lg border border-gray-200 p-2 text-center bg-gray-50 opacity-60 peer-disabled:cursor-not-allowed transition-all relative overflow-hidden">
+                                <span class="font-semibold text-sm block line-through">2 kg</span>
+                                <span class="text-xs text-gray-500 block line-through">Rp 75.000</span>
+                                <div class="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <span class="text-red-500 font-bold text-xs">Habis</span>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah Pesanan (Pcs) *</label>
+                    <div class="flex items-center mt-1">
+                        <button type="button" onclick="updateQty(-1)" class="w-10 h-10 rounded-l-lg border border-gray-300 bg-gray-50 hover:bg-gray-100 flex items-center justify-center font-bold text-gray-600 focus:outline-none transition-colors">-</button>
+                        <input type="number" id="coQty" min="1" value="1" required class="h-10 w-16 border-y border-gray-300 text-center focus:outline-none focus:border-primary font-semibold text-gray-900" onchange="if(this.value < 1) this.value = 1;">
+                        <button type="button" onclick="updateQty(1)" class="w-10 h-10 rounded-r-lg border border-gray-300 bg-gray-50 hover:bg-gray-100 flex items-center justify-center font-bold text-gray-600 focus:outline-none transition-colors">+</button>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Provinsi *</label>
+                    <select id="coProvinsi" required class="w-full rounded-lg border-gray-300 border px-4 py-2.5 bg-white focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" onchange="loadKabupaten(this.value)">
+                        <option value="">Pilih Provinsi</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kabupaten/Kota *</label>
+                    <select id="coKabupaten" required disabled class="w-full rounded-lg border-gray-300 border px-4 py-2.5 bg-gray-50 disabled:opacity-50 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" onchange="loadKecamatan(this.value)">
+                        <option value="">Pilih Kabupaten/Kota</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kecamatan *</label>
+                    <select id="coKecamatan" required disabled class="w-full rounded-lg border-gray-300 border px-4 py-2.5 bg-gray-50 disabled:opacity-50 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all">
+                        <option value="">Pilih Kecamatan</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Detail Alamat Lengkap *</label>
+                    <textarea id="coAddress" rows="2" required class="w-full rounded-lg border-gray-300 border px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="Nama Jalan, RT/RW, Nomor Rumah, Patokan..."></textarea>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Catatan Tambahan (Opsional)</label>
+                    <input type="text" id="coNotes" class="w-full rounded-lg border-gray-300 border px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="Contoh: Titip di pos satpam">
+                </div>
+                
+                <div class="pt-4 border-t border-gray-100">
+                    <button type="submit" class="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                        <span class="iconify text-xl" data-icon="mdi:whatsapp"></span>
+                        Kirim Pesanan ke WhatsApp
+                    </button>
+                    <p class="text-xs text-center text-gray-500 mt-3">Pembayaran transfer akan dinformasikan via WhatsApp.</p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white pt-16 pb-8 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+                <!-- Brand -->
+                <div>
+                    <img src="/assets/img/logo.svg" alt="Logo Mocafie" class="w-32 h-auto">
+                    <p class="text-gray-300 mt-4 text-sm leading-relaxed">
+                        Menghadirkan kebaikan tepung singkong lokal berkualitas internasional untuk kesehatan keluarga Anda.
+                    </p>
+                </div>
+
+                <!-- Links -->
+                <div>
+                    <h4 class="font-bold text-lg mb-4 text-green-400">Tautan Cepat</h4>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li><a href="#home" class="hover:text-white transition-colors">Home</a></li>
+                        <li><a href="#produk" class="hover:text-white transition-colors">Produk</a></li>
+                        <li><a href="#tentang" class="hover:text-white transition-colors">Tentang Kami</a></li>
+                        <li><a href="#resep" class="hover:text-white transition-colors">Resep</a></li>
+                    </ul>
+                </div>
+
+                <!-- Legal -->
+                <div>
+                    <h4 class="font-bold text-lg mb-4 text-green-400">Bantuan</h4>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li><a href="#" class="hover:text-white transition-colors">FAQ</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Kebijakan Privasi</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Syarat & Ketentuan</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Info Pengiriman</a></li>
+                    </ul>
+                </div>
+
+<!-- Social -->
+<div>
+  <h4 class="font-bold text-lg mb-4 text-green-400">Ikuti Kami</h4>
+
+  <div class="flex gap-4">
+    <!-- Instagram -->
+    <a href="https://www.instagram.com/mocafie.id" target="_blank" rel="noopener"
+       aria-label="Instagram Mocafie"
+       class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary transition-colors text-white">
+      <span class="iconify text-xl" data-icon="mdi:instagram"></span>
+    </a>
+
+    <!-- Facebook -->
+    <a href="https://www.facebook.com/mocafie.id" target="_blank" rel="noopener"
+       aria-label="Facebook Mocafie"
+       class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary transition-colors text-white">
+      <span class="iconify text-xl" data-icon="mdi:facebook"></span>
+    </a>
+
+    <!-- YouTube -->
+    <a href="https://www.youtube.com/@mocafie" target="_blank" rel="noopener"
+       aria-label="YouTube Mocafie"
+       class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary transition-colors text-white">
+      <span class="iconify text-xl" data-icon="mdi:youtube"></span>
+    </a>
+  </div>
+</div>
+
+            <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-400">
+                <p>&copy; 2026 Mocafie Indonesia. All rights reserved.</p>
+                <div class="mt-4 md:mt-0">
+                    <span class="text-xs">100% Sehat dari Alam</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Menu Script -->
+    <script>
+        const btn = document.querySelector("button.mobile-menu-button");
+        const menu = document.querySelector(".mobile-menu");
+        const hamburgerIcon = document.querySelector(".hamburger-icon");
+        const closeIcon = document.querySelector(".close-icon");
+
+        function toggleMenu() {
+            menu.classList.toggle("hidden");
+            hamburgerIcon.classList.toggle("hidden");
+            closeIcon.classList.toggle("hidden");
+        }
+
+        btn.addEventListener("click", () => {
+            toggleMenu();
+        });
+
+        // Close mobile menu when clicking a link
+        document.querySelectorAll('.mobile-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (!menu.classList.contains('hidden')) {
+                    toggleMenu();
+                }
+            });
+        });
+    </script>
+    <script src="/assets/js/script.js?v=20260219" defer></script>
+</body>
+</html>
