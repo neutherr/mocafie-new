@@ -1,17 +1,40 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // ===== Scroll Animations (punya kamu, aman) =====
-    const observerOptions = { root: null, rootMargin: "-50px 0px", threshold: 0.15 };
+    // ===== Scroll Reveal Animations =====
+    // Trigger a bit earlier (-30px) and at a lower threshold (8%)
+    // so tall cards/sections aren't missed on smaller viewports.
+    const observerOptions = {
+        root: null,
+        rootMargin: "-30px 0px",
+        threshold: 0.08,
+    };
 
     const observer = new IntersectionObserver((entries, obs) => {
         entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add("appear");
-                obs.unobserve(entry.target);
+            if (!entry.isIntersecting) return;
+
+            const el = entry.target;
+
+            // Auto-stagger siblings inside the same parent
+            // Only apply if the element doesn't already have an explicit delay class
+            const hasExplicitDelay = ["delay-100", "delay-200", "delay-300", "delay-400", "delay-500"]
+                .some(c => el.classList.contains(c));
+
+            if (!hasExplicitDelay) {
+                const siblings = Array.from(el.parentElement?.querySelectorAll(".animate-on-scroll") ?? []);
+                const idx = siblings.indexOf(el);
+                if (idx > 0) {
+                    // 60ms stagger per sibling, capped at 400ms
+                    el.style.transitionDelay = Math.min(idx * 60, 400) + "ms";
+                }
             }
+
+            el.classList.add("appear");
+            obs.unobserve(el);
         });
     }, observerOptions);
 
     document.querySelectorAll(".animate-on-scroll").forEach((el) => observer.observe(el));
+
 
     // ===== Gallery Slider Only (PAKAI INI SAJA) =====
     const viewport = document.getElementById("galleryViewport");
@@ -415,163 +438,159 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-        // Checkout Modal Logic
-        const checkoutModal = document.getElementById('checkoutModal');
-        const modalContent = checkoutModal.querySelector('div.bg-white');
+// ===== Checkout Modal Logic =====
+// Fungsi didefinisikan di global scope menggunakan function declarations.
+// DOM element diambil saat dipanggil (lazy) - tidak bergantung pada timing apapun.
 
-        // Fetch API settings for regions
-        const apiBps = 'https://www.emsifa.com/api-wilayah-indonesia/api';
+const _CO_API = "https://www.emsifa.com/api-wilayah-indonesia/api";
 
-        // Load Provinces when modal opens
-        async function loadProvinsi() {
-            try {
-                const response = await fetch(`${apiBps}/provinces.json`);
-                const data = await response.json();
-                const select = document.getElementById('coProvinsi');
-                
-                // Clear existing options except first
-                select.innerHTML = '<option value="">Pilih Provinsi</option>';
-                
-                data.forEach(prov => {
-                    const option = document.createElement('option');
-                    option.value = prov.id;
-                    option.textContent = prov.name;
-                    select.appendChild(option);
-                });
-            } catch (error) {
-                console.error('Error loading provinces:', error);
-            }
-        }
+function openCheckoutModal() {
+    const modal = document.getElementById("checkoutModal");
+    const content = modal && modal.querySelector("div.bg-white");
+    if (!modal || !content) return;
 
-        // Load Kabupaten/Kota based on selected Province
-        async function loadKabupaten(provinsiId) {
-            const selectKabupaten = document.getElementById('coKabupaten');
-            const selectKecamatan = document.getElementById('coKecamatan');
-            
-            // Reset and disable cascading selects
-            selectKabupaten.innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
-            selectKecamatan.innerHTML = '<option value="">Pilih Kecamatan</option>';
-            selectKabupaten.disabled = true;
-            selectKabupaten.classList.add('bg-gray-50');
-            selectKecamatan.disabled = true;
-            selectKecamatan.classList.add('bg-gray-50');
+    modal.classList.remove("hidden");
+    void modal.offsetWidth;
+    modal.classList.remove("opacity-0");
+    modal.classList.add("opacity-100");
+    content.classList.remove("scale-95");
+    content.classList.add("scale-100");
+    document.body.style.overflow = "hidden";
 
-            if (!provinsiId) return;
+    const prov = document.getElementById("coProvinsi");
+    if (prov && prov.options.length <= 1) loadProvinsi();
 
-            try {
-                selectKabupaten.disabled = false;
-                selectKabupaten.classList.remove('bg-gray-50');
-                
-                const response = await fetch(`${apiBps}/regencies/${provinsiId}.json`);
-                const data = await response.json();
-                
-                data.forEach(kab => {
-                    const option = document.createElement('option');
-                    option.value = kab.id;
-                    option.textContent = kab.name;
-                    selectKabupaten.appendChild(option);
-                });
-            } catch (error) {
-                console.error('Error loading regencies:', error);
-            }
-        }
-
-        // Load Kecamatan based on selected Kabupaten/Kota
-        async function loadKecamatan(kabupatenId) {
-            const selectKecamatan = document.getElementById('coKecamatan');
-            
-            // Reset
-            selectKecamatan.innerHTML = '<option value="">Pilih Kecamatan</option>';
-            selectKecamatan.disabled = true;
-            selectKecamatan.classList.add('bg-gray-50');
-
-            if (!kabupatenId) return;
-
-            try {
-                selectKecamatan.disabled = false;
-                selectKecamatan.classList.remove('bg-gray-50');
-                
-                const response = await fetch(`${apiBps}/districts/${kabupatenId}.json`);
-                const data = await response.json();
-                
-                data.forEach(kec => {
-                    const option = document.createElement('option');
-                    option.value = kec.id;
-                    option.textContent = kec.name;
-                    selectKecamatan.appendChild(option);
-                });
-            } catch (error) {
-                console.error('Error loading districts:', error);
-            }
-        }
-
-
-        function openCheckoutModal() {
-            checkoutModal.classList.remove('hidden');
-            // Trigger reflow
-            void checkoutModal.offsetWidth;
-            checkoutModal.classList.remove('opacity-0');
-            checkoutModal.classList.add('opacity-100');
-            modalContent.classList.remove('scale-95');
-            modalContent.classList.add('scale-100');
-            // Prevent body scroll
-            document.body.style.overflow = 'hidden';
-            
-            // Load provinces if not already loaded
-            if (document.getElementById('coProvinsi').options.length <= 1) {
-                loadProvinsi();
-            }
-        }
-
-        function closeCheckoutModal() {
-            checkoutModal.classList.remove('opacity-100');
-            checkoutModal.classList.add('opacity-0');
-            modalContent.classList.remove('scale-100');
-            modalContent.classList.add('scale-95');
-            // Restore body scroll
-            document.body.style.overflow = '';
-            setTimeout(() => {
-                checkoutModal.classList.add('hidden');
-            }, 300); // match duration-300
-        }
-
-        // Close when clicking outside content
-        checkoutModal.addEventListener('click', function(e) {
-            if (e.target === checkoutModal) {
-                closeCheckoutModal();
-            }
+    if (!modal._coInit) {
+        modal._coInit = true;
+        modal.addEventListener("click", (e) => {
+            if (e.target === modal) closeCheckoutModal();
         });
+    }
+}
 
-        function updateQty(change) {
-            const qtyInput = document.getElementById('coQty');
-            let newQty = parseInt(qtyInput.value) + change;
-            if(newQty < 1) newQty = 1;
-            qtyInput.value = newQty;
-        }
+function closeCheckoutModal() {
+    const modal = document.getElementById("checkoutModal");
+    const content = modal && modal.querySelector("div.bg-white");
+    if (!modal || !content) return;
 
-        function processCheckout(e) {
-            e.preventDefault();
-            
-            const name = document.getElementById('coName').value.trim();
-            const phone = document.getElementById('coPhone').value.trim();
-            const size = document.querySelector('input[name="coSize"]:checked').value;
-            const qty = document.getElementById('coQty').value;
-            
-            // Get text text of selected locations
-            const provSelect = document.getElementById('coProvinsi');
-            const kabSelect = document.getElementById('coKabupaten');
-            const kecSelect = document.getElementById('coKecamatan');
-            
-            const provText = provSelect.options[provSelect.selectedIndex].text;
-            const kabText = kabSelect.options[kabSelect.selectedIndex].text;
-            const kecText = kecSelect.options[kecSelect.selectedIndex].text;
-            
-            const detailAddress = document.getElementById('coAddress').value.trim();
-            const notes = document.getElementById('coNotes').value.trim();
-            
-            const adminWA = "6285188789052"; // Sesuai dengan form contact
-            
-            const message = `Halo Admin Mocafie, saya ingin memesan Tepung Mocaf:
+    modal.classList.remove("opacity-100");
+    modal.classList.add("opacity-0");
+    content.classList.remove("scale-100");
+    content.classList.add("scale-95");
+    document.body.style.overflow = "";
+
+    setTimeout(() => modal.classList.add("hidden"), 300);
+}
+
+function updateQty(change) {
+    const qtyInput = document.getElementById("coQty");
+    if (!qtyInput) return;
+    let newQty = parseInt(qtyInput.value || "1", 10) + change;
+    if (newQty < 1) newQty = 1;
+    qtyInput.value = newQty;
+}
+
+async function loadProvinsi() {
+    try {
+        const response = await fetch(`${_CO_API}/provinces.json`);
+        const data = await response.json();
+        const select = document.getElementById("coProvinsi");
+        if (!select) return;
+
+        select.innerHTML = '<option value="">Pilih Provinsi</option>';
+        data.forEach((prov) => {
+            const option = document.createElement("option");
+            option.value = prov.id;
+            option.textContent = prov.name;
+            select.appendChild(option);
+        });
+    } catch (error) {
+        console.error("Error loading provinces:", error);
+    }
+}
+
+async function loadKabupaten(provinsiId) {
+    const selectKabupaten = document.getElementById("coKabupaten");
+    const selectKecamatan = document.getElementById("coKecamatan");
+    if (!selectKabupaten || !selectKecamatan) return;
+
+    selectKabupaten.innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
+    selectKecamatan.innerHTML = '<option value="">Pilih Kecamatan</option>';
+    selectKabupaten.disabled = true;
+    selectKabupaten.classList.add("bg-gray-50");
+    selectKecamatan.disabled = true;
+    selectKecamatan.classList.add("bg-gray-50");
+
+    if (!provinsiId) return;
+
+    try {
+        selectKabupaten.disabled = false;
+        selectKabupaten.classList.remove("bg-gray-50");
+
+        const response = await fetch(`${_CO_API}/regencies/${provinsiId}.json`);
+        const data = await response.json();
+
+        data.forEach((kab) => {
+            const option = document.createElement("option");
+            option.value = kab.id;
+            option.textContent = kab.name;
+            selectKabupaten.appendChild(option);
+        });
+    } catch (error) {
+        console.error("Error loading regencies:", error);
+    }
+}
+
+async function loadKecamatan(kabupatenId) {
+    const selectKecamatan = document.getElementById("coKecamatan");
+    if (!selectKecamatan) return;
+
+    selectKecamatan.innerHTML = '<option value="">Pilih Kecamatan</option>';
+    selectKecamatan.disabled = true;
+    selectKecamatan.classList.add("bg-gray-50");
+
+    if (!kabupatenId) return;
+
+    try {
+        selectKecamatan.disabled = false;
+        selectKecamatan.classList.remove("bg-gray-50");
+
+        const response = await fetch(`${_CO_API}/districts/${kabupatenId}.json`);
+        const data = await response.json();
+
+        data.forEach((kec) => {
+            const option = document.createElement("option");
+            option.value = kec.id;
+            option.textContent = kec.name;
+            selectKecamatan.appendChild(option);
+        });
+    } catch (error) {
+        console.error("Error loading districts:", error);
+    }
+}
+
+function processCheckout(e) {
+    e.preventDefault();
+
+    const name = document.getElementById("coName")?.value.trim() || "";
+    const phone = document.getElementById("coPhone")?.value.trim() || "";
+    const size = document.querySelector('input[name="coSize"]:checked')?.value || "";
+    const qty = document.getElementById("coQty")?.value || "1";
+
+    const provSelect = document.getElementById("coProvinsi");
+    const kabSelect = document.getElementById("coKabupaten");
+    const kecSelect = document.getElementById("coKecamatan");
+
+    const provText = provSelect?.options[provSelect.selectedIndex]?.text || "";
+    const kabText = kabSelect?.options[kabSelect.selectedIndex]?.text || "";
+    const kecText = kecSelect?.options[kecSelect.selectedIndex]?.text || "";
+
+    const detailAddress = document.getElementById("coAddress")?.value.trim() || "";
+    const notes = document.getElementById("coNotes")?.value.trim() || "";
+
+    const adminWA = "6285188789052";
+
+    const message = `Halo Admin Mocafie, saya ingin memesan Tepung Mocaf:
 
 *--- DATA PEMESAN ---*
 Nama: ${name}
@@ -587,13 +606,11 @@ ${detailAddress}
 Kec. ${kecText}, ${kabText}
 Prov. ${provText}
 
-${notes ? `*--- CATATAN ---*\n${notes}` : ''}
+${notes ? `*--- CATATAN ---*\n${notes}` : ""}
 
 Mohon info total biaya + ongkir serta rekening pembayarannya ya. Terima kasih!`;
 
-            const encodedMessage = encodeURIComponent(message);
-            const waLink = `https://wa.me/${adminWA}?text=${encodedMessage}`;
-            
-            window.open(waLink, '_blank');
-            closeCheckoutModal();
-        }
+    window.open(`https://wa.me/${adminWA}?text=${encodeURIComponent(message)}`, "_blank");
+    closeCheckoutModal();
+}
+

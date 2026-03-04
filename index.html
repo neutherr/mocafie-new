@@ -73,21 +73,53 @@
             display: none;
         }
         
-        /* Scroll Animation Utilities */
+        /* ===== Scroll Reveal Animations ===== */
         .animate-on-scroll {
             opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            transform: translateY(24px);
+            /* Snappier ease-out: fast start, smooth settle */
+            transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+                        transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            /* GPU compositing hint */
+            will-change: opacity, transform;
         }
-        
+
         .animate-on-scroll.appear {
             opacity: 1;
             transform: translateY(0);
+            will-change: auto; /* release after animation settles */
         }
-        
-        .delay-100 { transition-delay: 150ms; }
-        .delay-200 { transition-delay: 300ms; }
-        .delay-300 { transition-delay: 450ms; }
+
+        /* Directional variants */
+        .anim-from-left  { transform: translateX(-32px); }
+        .anim-from-right { transform: translateX( 32px); }
+        .anim-from-left.appear,
+        .anim-from-right.appear { transform: translateX(0); }
+
+        /* Scale-in variant (good for cards/badges) */
+        .anim-scale-in { transform: scale(0.92) translateY(16px); }
+        .anim-scale-in.appear { transform: scale(1) translateY(0); }
+
+        /* Stagger delays */
+        .delay-100 { transition-delay:  80ms; }
+        .delay-200 { transition-delay: 160ms; }
+        .delay-300 { transition-delay: 240ms; }
+        .delay-400 { transition-delay: 320ms; }
+        .delay-500 { transition-delay: 400ms; }
+
+        /* Respect reduced-motion preference */
+        @media (prefers-reduced-motion: reduce) {
+            .animate-on-scroll,
+            .anim-from-left,
+            .anim-from-right,
+            .anim-scale-in {
+                opacity: 1 !important;
+                transform: none !important;
+                transition: none !important;
+                will-change: auto !important;
+            }
+        }
+
 
         .gallery-item {
             /* Width handled by Tailwind utility now */
@@ -212,14 +244,14 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                 <!-- Product Image -->
-                <div class="order-2 md:order-1">
+                <div>
                     <div class="img-placeholder-container aspect-[3/4] rounded-2xl shadow-xl overflow-hidden group animate-on-scroll">
                         <img src="assets/img/product-pack.webp" alt="Kemasan Mocafie" width="600" height="800" loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" onerror="this.style.display='none';this.parentElement.classList.add('img-missing')">
                     </div>
                 </div>
 
                 <!-- Product Details -->
-                <div class="order-1 md:order-2 space-y-8">
+                <div class="space-y-8">
                     <h3 class="font-serif text-3xl font-bold text-primary">Tepung Mocafie Serbaguna</h3>
                     <p class="text-gray-600 leading-relaxed">
                         Tepung singkong fermentasi yang memiliki karakteristik mirip terigu namun bebas gluten. Warna lebih putih, aroma netral (tidak berbau apek singkong), dan tekstur lebih halus.
@@ -340,7 +372,7 @@
     <section id="tentang" class="py-20 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row items-center gap-12">
-                <div class="md:w-1/2">
+                <div class="md:w-1/2 animate-on-scroll anim-from-left">
                     <!-- Image Placeholder: About Us -->
                     <!-- Ganti gambar di: assets/img/about-farmer.jpg -->
                     <div class="img-placeholder-container aspect-video rounded-2xl shadow-lg transform md:-rotate-2 border-4 border-surface overflow-hidden">
@@ -352,7 +384,7 @@
                         >
                     </div>
                 </div>
-                <div class="md:w-1/2 space-y-6">
+                <div class="md:w-1/2 space-y-6 animate-on-scroll anim-from-right">
                     <span class="text-accent font-semibold tracking-wider uppercase text-sm">Cerita Kami</span>
                     <h2 class="font-serif text-3xl md:text-4xl font-bold text-gray-900">Memberdayakan Petani, Menyehatkan Negeri</h2>
                     <p class="text-gray-600 leading-relaxed text-lg">
@@ -376,39 +408,47 @@
             
             <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
                 <!-- Halal -->
-                <div class="flex flex-col items-center justify-center p-6 bg-white rounded-xl shadow-sm border border-gray-100 hover:border-primary/30 transition-colors">
-                    <div class="w-24 h-24 flex items-center justify-center mb-3">
-                        <img src="assets/img/halal-logo.jpg" alt="Halal Logo" class="w-full h-full object-contain">
+                <div class="animate-on-scroll anim-scale-in h-full">
+                    <div class="flex flex-col items-center justify-center p-6 bg-white rounded-xl shadow-sm border border-gray-100 hover:border-primary/30 transition-colors h-full">
+                        <div class="w-24 h-24 flex items-center justify-center mb-3">
+                            <img src="assets/img/halal-logo.jpg" alt="Halal Logo" class="w-full h-full object-contain">
+                        </div>
+                        <span class="font-bold text-gray-800">HALAL</span>
+                        <span class="text-xs text-gray-500 text-center mt-1">Sertifikasi Halal MUI</span>
                     </div>
-                    <span class="font-bold text-gray-800">HALAL</span>
-                    <span class="text-xs text-gray-500 text-center mt-1">Sertifikasi Halal MUI</span>
                 </div>
 
                 <!-- BPOM -->
-                <div class="flex flex-col items-center justify-center p-6 bg-white rounded-xl shadow-sm border border-gray-100 hover:border-primary/30 transition-colors">
-                    <div class="w-24 h-24 flex items-center justify-center mb-3">
-                        <img src="assets/img/bpom-logo.png" alt="BPOM Logo" class="w-full h-full object-contain">
+                <div class="animate-on-scroll anim-scale-in delay-100 h-full">
+                    <div class="flex flex-col items-center justify-center p-6 bg-white rounded-xl shadow-sm border border-gray-100 hover:border-primary/30 transition-colors h-full">
+                        <div class="w-24 h-24 flex items-center justify-center mb-3">
+                            <img src="assets/img/bpom-logo.png" alt="BPOM Logo" class="w-full h-full object-contain">
+                        </div>
+                        <span class="font-bold text-gray-800">BPOM RI</span>
+                        <span class="text-xs text-gray-500 text-center mt-1">Izin Edar Resmi</span>
                     </div>
-                    <span class="font-bold text-gray-800">BPOM RI</span>
-                    <span class="text-xs text-gray-500 text-center mt-1">Izin Edar Resmi</span>
                 </div>
 
                 <!-- HACCP -->
-                <div class="flex flex-col items-center justify-center p-6 bg-white rounded-xl shadow-sm border border-gray-100 hover:border-primary/30 transition-colors">
-                    <div class="w-24 h-24 flex items-center justify-center mb-3">
-                        <img src="assets/img/haccp-logo.png" alt="HACCP Logo" class="w-full h-full object-contain">
+                <div class="animate-on-scroll anim-scale-in delay-200 h-full">
+                    <div class="flex flex-col items-center justify-center p-6 bg-white rounded-xl shadow-sm border border-gray-100 hover:border-primary/30 transition-colors h-full">
+                        <div class="w-24 h-24 flex items-center justify-center mb-3">
+                            <img src="assets/img/haccp-logo.png" alt="HACCP Logo" class="w-full h-full object-contain">
+                        </div>
+                        <span class="font-bold text-gray-800">HACCP</span>
+                        <span class="text-xs text-gray-500 text-center mt-1">Hazard Analysis Critical Control Point</span>
                     </div>
-                    <span class="font-bold text-gray-800">HACCP</span>
-                    <span class="text-xs text-gray-500 text-center mt-1">Hazard Analysis Critical Control Point</span>
                 </div>
 
                 <!-- ISO -->
-                <div class="flex flex-col items-center justify-center p-6 bg-white rounded-xl shadow-sm border border-gray-100 hover:border-primary/30 transition-colors">
-                    <div class="w-24 h-24 flex items-center justify-center mb-3">
-                        <img src="assets/img/iso-logo.png" alt="ISO Logo" class="w-full h-full object-contain">
+                <div class="animate-on-scroll anim-scale-in delay-300 h-full">
+                    <div class="flex flex-col items-center justify-center p-6 bg-white rounded-xl shadow-sm border border-gray-100 hover:border-primary/30 transition-colors h-full">
+                        <div class="w-24 h-24 flex items-center justify-center mb-3">
+                            <img src="assets/img/iso-logo.png" alt="ISO Logo" class="w-full h-full object-contain">
+                        </div>
+                        <span class="font-bold text-gray-800">ISO</span>
+                        <span class="text-xs text-gray-500 text-center mt-1">Standardisasi Internasional</span>
                     </div>
-                    <span class="font-bold text-gray-800">ISO</span>
-                    <span class="text-xs text-gray-500 text-center mt-1">Standardisasi Internasional</span>
                 </div>
             </div>
         </div>
@@ -690,10 +730,10 @@
         <div class="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-12 scrollbar-hide scroll-smooth" id="recipeSlider">
                 <!-- Resep 1 -->
-                <a href="/resep/resep-nugget.html" class="snap-center shrink-0 w-[90%] md:w-[600px] lg:w-[700px] relative group cursor-pointer transition-transform duration-300 animate-on-scroll block">
+                <a href="resep/resep-nugget.html" class="snap-center shrink-0 w-[90%] md:w-[600px] lg:w-[700px] relative group cursor-pointer transition-transform duration-300 animate-on-scroll block">
                     <div class="relative h-[450px] md:h-[500px] rounded-3xl overflow-hidden shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
                         <div class="absolute inset-0 w-full md:w-[65%] h-full bg-gray-100">
-                            <img alt="Nugget Ayam Mocafie" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" src="/assets/img/resep-nugget-ayam-mocafie.jpeg"/>
+                            <img alt="Nugget Ayam Mocafie" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" src="assets/img/resep-nugget-ayam-mocafie.jpeg"/>
                             <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent md:hidden"></div>
                         </div>
                         <div class="absolute bottom-0 right-0 left-0 md:left-auto md:top-12 md:bottom-12 md:right-8 w-full md:w-[45%] bg-white rounded-b-3xl md:rounded-3xl p-6 md:p-8 shadow-xl flex flex-col justify-center z-10 border border-gray-100 group-hover:-translate-y-1 transition-transform duration-300">
@@ -716,10 +756,10 @@
                 </a>
                 
                 <!-- Resep 2 -->
-                <a href="/resep/poci-poci-pemalang.html" class="snap-center shrink-0 w-[90%] md:w-[600px] lg:w-[700px] relative group cursor-pointer transition-transform duration-300 animate-on-scroll delay-100 block">
+                <a href="resep/poci-poci-pemalang.html" class="snap-center shrink-0 w-[90%] md:w-[600px] lg:w-[700px] relative group cursor-pointer transition-transform duration-300 animate-on-scroll delay-100 block">
                     <div class="relative h-[450px] md:h-[500px] rounded-3xl overflow-hidden shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
                         <div class="absolute inset-0 w-full md:w-[65%] h-full bg-gray-100">
-                            <img alt="Poci-Poci Pemalang" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" src="/assets/img/pocipoci.jpeg"/>
+                            <img alt="Poci-Poci Pemalang" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" src="assets/img/pocipoci.jpeg"/>
                             <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent md:hidden"></div>
                         </div>
                         <div class="absolute bottom-0 right-0 left-0 md:left-auto md:top-12 md:bottom-12 md:right-8 w-full md:w-[45%] bg-white rounded-b-3xl md:rounded-3xl p-6 md:p-8 shadow-xl flex flex-col justify-center z-10 border border-gray-100 group-hover:-translate-y-1 transition-transform duration-300">
@@ -833,7 +873,10 @@
                                 </div>
                                 <div>
                                     <h4 class="font-semibold text-lg">Alamat</h4>
-                                    <p class="text-white/80 opacity-90">Ruko Griya Sawangan Indah No. R-11, Jl. H. Sulaiman, Bedahan, Sawangan, Depok.<br>Jawa Barat, Indonesia</p>
+                                    <p class="text-white/80 opacity-90">
+                                        <strong>Distributor Mocafie - Tepung Mocaf Premium</strong><br>
+                                        Ruko Griya Sawangan Indah, Jl. H. Sulaiman No.11, RT.05/RW.03, Bedahan, Kec. Sawangan, Kota Depok, Jawa Barat 16519
+                                    </p>
                                 </div>
                             </div>
                             <div class="flex items-start gap-4">
@@ -842,7 +885,7 @@
                                 </div>
                                 <div>
                                     <h4 class="font-semibold text-lg">Email</h4>
-                                    <p class="text-white/80 opacity-90">marketing.mocafie@gmail.com</p>
+                                    <p class="text-white/80 opacity-90">marketing.mokafie@gmail.com</p>
                                 </div>
                             </div>
                             <div class="flex items-start gap-4">
@@ -861,7 +904,7 @@
                         <iframe
                             title="Lokasi Mocafie di Google Maps"
                             class="w-full h-full block"
-                            src="https://maps.google.com/maps?q=Ruko%20Griya%20Sawangan%20Indah%20No.%20R-11,%20Jl.%20H.%20Sulaiman,%20Bedahan,%20Sawangan,%20Depok&t=&z=14&ie=UTF8&iwloc=&output=embed"
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3964.887254558004!2d106.76766497573514!3d-6.408430293582494!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69e95e5bcb24cf%3A0x3b5ce274d697a8ff!2sDistributor%20Mocafie%20-%20Tepung%20Mocaf%20Premium!5e0!3m2!1sen!2sid!4v1709489500000!5m2!1sen!2sid"
                             loading="lazy"
                             referrerpolicy="no-referrer-when-downgrade"
                             style="border:0;"
@@ -921,7 +964,7 @@
                             </div>
                         </label>
                         <label class="cursor-pointer">
-                            <input type="radio" name="coSize" value="1kg (Rp 40.000)" class="peer sr-only" required checked>
+                            <input type="radio" name="coSize" value="1kg (Rp 30.000)" class="peer sr-only" required checked>
                             <div class="rounded-lg border border-gray-200 p-2 text-center peer-checked:bg-primary/10 peer-checked:border-primary peer-checked:text-primary hover:bg-gray-50 transition-all">
                                 <span class="font-semibold text-sm block">1 kg</span>
                                 <span class="text-xs text-gray-500 block">Rp 40.000</span>
@@ -997,7 +1040,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
                 <!-- Brand -->
                 <div>
-                    <img src="/assets/img/logo.svg" alt="Logo Mocafie" class="w-32 h-auto">
+                    <img src="assets/img/logo.svg" alt="Logo Mocafie" class="w-32 h-auto">
                     <p class="text-gray-300 mt-4 text-sm leading-relaxed">
                         Menghadirkan kebaikan tepung singkong lokal berkualitas internasional untuk kesehatan keluarga Anda.
                     </p>
@@ -1088,6 +1131,6 @@
             });
         });
     </script>
-    <script src="/assets/js/script.js?v=20260219" defer></script>
+    <script src="assets/js/script.js?v=20260304" defer></script>
 </body>
 </html>
