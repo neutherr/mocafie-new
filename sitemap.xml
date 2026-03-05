@@ -4,9 +4,12 @@
     <loc>https://mocafie.com/</loc>
   </url>
   <url>
-    <loc>https://mocafie.com/resep/resep-nugget.html</loc>
+    <loc>https://mocafie.com/resep/</loc>
   </url>
   <url>
-    <loc>https://mocafie.com/belanja/index.html</loc>
+    <loc>https://mocafie.com/resep/resep-nugget/</loc>
+  </url>
+  <url>
+    <loc>https://mocafie.com/belanja/</loc>
   </url>
 </urlset>
