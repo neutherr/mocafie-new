@@ -1,0 +1,65 @@
+{
+  "meta": {
+    "message": "Success Calculate Domestic Shipping cost",
+    "code": 200,
+    "status": "success"
+  },
+  "data": [
+    {
+      "name": "Jalur Nugraha Ekakurir (JNE)",
+      "code": "jne",
+      "service": "CTC",
+      "description": "JNE City Courier",
+      "cost": 7000,
+      "etd": "1 day"
+    },
+    {
+      "name": "Jalur Nugraha Ekakurir (JNE)",
+      "code": "jne",
+      "service": "JTR",
+      "description": "JNE Trucking",
+      "cost": 40000,
+      "etd": "3 day"
+    },
+    {
+      "name": "Jalur Nugraha Ekakurir (JNE)",
+      "code": "jne",
+      "service": "CTCSPS",
+      "description": "JNE City Courier",
+      "cost": 25000,
+      "etd": "0 day"
+    },
+    {
+      "name": "Jalur Nugraha Ekakurir (JNE)",
+      "code": "jne",
+      "service": "CTCYES",
+      "description": "JNE City Courier",
+      "cost": 11000,
+      "etd": "1 day"
+    },
+    {
+      "name": "Jalur Nugraha Ekakurir (JNE)",
+      "code": "jne",
+      "service": "JTR<130",
+      "description": "JNE Trucking",
+      "cost": 200000,
+      "etd": "3 day"
+    },
+    {
+      "name": "Jalur Nugraha Ekakurir (JNE)",
+      "code": "jne",
+      "service": "JTR>130",
+      "description": "JNE Trucking",
+      "cost": 350000,
+      "etd": "3 day"
+    },
+    {
+      "name": "Jalur Nugraha Ekakurir (JNE)",
+      "code": "jne",
+      "service": "JTR>200",
+      "description": "JNE Trucking",
+      "cost": 600000,
+      "etd": "3 day"
+    }
+  ]
+}

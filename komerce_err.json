@@ -1,0 +1,1 @@
+{"meta":{"message":"Key: 'CalculateRequestV2.Origin' Error:Field validation for 'Origin' failed on the 'required' tag\nKey: 'CalculateRequestV2.Destination' Error:Field validation for 'Destination' failed on the 'required' tag","code":400,"status":"error"},"data":null}

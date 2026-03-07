@@ -444,11 +444,51 @@ document.addEventListener("DOMContentLoaded", () => {
 
 const _CO_API = "https://www.emsifa.com/api-wilayah-indonesia/api";
 
+let currentTotalProduk = 0;
+let currentOngkir = 0;
+
 function openCheckoutModal() {
     const modal = document.getElementById("checkoutModal");
     const content = modal && modal.querySelector("div.bg-white");
     if (!modal || !content) return;
 
+    // Populate Order Summary
+    const summaryContainer = document.getElementById("coOrderSummary");
+    const totalProdukLabel = document.getElementById("coTotalProdukLabel");
+
+    if (cartItems.length === 0) {
+        alert("Keranjang Anda kosong!");
+        return;
+    }
+
+    let summaryHtml = '<ul class="space-y-2">';
+    currentTotalProduk = 0;
+
+    cartItems.forEach(item => {
+        const itemTotal = item.price * item.qty;
+        currentTotalProduk += itemTotal;
+        summaryHtml += `
+            <li class="flex justify-between text-sm">
+                <span class="text-gray-700">${item.qty}x ${item.name}</span>
+                <span class="font-medium text-gray-900">Rp ${itemTotal.toLocaleString('id-ID')}</span>
+            </li>
+        `;
+    });
+    summaryHtml += '</ul>';
+
+    if (summaryContainer) summaryContainer.innerHTML = summaryHtml;
+    if (totalProdukLabel) totalProdukLabel.textContent = `Rp ${currentTotalProduk.toLocaleString('id-ID')}`;
+
+    // Reset Ongkir & Kurir
+    currentOngkir = 0;
+    const kurirSelect = document.getElementById("coKurir");
+    if (kurirSelect) {
+        kurirSelect.innerHTML = '<option value="">Isi Lokasi Dahulu</option>';
+        kurirSelect.disabled = true;
+    }
+    updateTotalBayar();
+
+    // Tampilkan Modal
     modal.classList.remove("hidden");
     void modal.offsetWidth;
     modal.classList.remove("opacity-0");
@@ -482,135 +522,412 @@ function closeCheckoutModal() {
     setTimeout(() => modal.classList.add("hidden"), 300);
 }
 
-function updateQty(change) {
-    const qtyInput = document.getElementById("coQty");
-    if (!qtyInput) return;
-    let newQty = parseInt(qtyInput.value || "1", 10) + change;
-    if (newQty < 1) newQty = 1;
-    qtyInput.value = newQty;
+// function updateQty removed as it's handled by cart logic now
+
+let searchTimeout;
+
+function searchDestination(keyword) {
+    const resultsContainer = document.getElementById("destinationResults");
+
+    // Clear previous timeout
+    clearTimeout(searchTimeout);
+
+    if (!keyword || keyword.length < 3) {
+        resultsContainer.classList.add("hidden");
+        return;
+    }
+
+    // Debounce for 500ms
+    searchTimeout = setTimeout(async () => {
+        try {
+            resultsContainer.innerHTML = '<div class="p-3 text-gray-500 text-sm">Mencari...</div>';
+            resultsContainer.classList.remove("hidden");
+
+            const response = await fetch(`api/rajaongkir_destination.php?search=${encodeURIComponent(keyword)}`);
+            const json = await response.json();
+
+            resultsContainer.innerHTML = '';
+
+            if (json.status === "error") {
+                resultsContainer.innerHTML = `<div class="p-3 text-red-500 text-sm">${json.message}</div>`;
+                return;
+            }
+
+            if (json.meta && json.meta.code === 200 && json.data && json.data.length > 0) {
+                json.data.forEach(item => {
+                    const div = document.createElement("div");
+                    div.className = "p-3 hover:bg-gray-100 cursor-pointer text-sm border-b border-gray-100 last:border-0";
+                    div.textContent = item.label;
+                    div.onclick = () => selectDestination(item.id, item.label);
+                    resultsContainer.appendChild(div);
+                });
+            } else {
+                resultsContainer.innerHTML = '<div class="p-3 text-gray-500 text-sm">Lokasi tidak ditemukan.</div>';
+            }
+        } catch (error) {
+            console.error("Search API Error:", error);
+            resultsContainer.innerHTML = '<div class="p-3 text-red-500 text-sm">Koneksi API Gagal. Pastikan tes di Hostinger (PHP).</div>';
+        }
+    }, 500);
 }
 
-async function loadProvinsi() {
-    try {
-        const response = await fetch(`${_CO_API}/provinces.json`);
-        const data = await response.json();
-        const select = document.getElementById("coProvinsi");
-        if (!select) return;
+function selectDestination(id, label) {
+    document.getElementById("coDestinationSearch").value = label;
+    document.getElementById("coDestinationId").value = id;
+    document.getElementById("destinationResults").classList.add("hidden");
 
-        select.innerHTML = '<option value="">Pilih Provinsi</option>';
-        data.forEach((prov) => {
-            const option = document.createElement("option");
-            option.value = prov.id;
-            option.textContent = prov.name;
-            select.appendChild(option);
+    // Auto calculate ongkir
+    cekOngkir();
+}
+
+// Menutup search resutls jika di klik di luar
+document.addEventListener("click", function (event) {
+    const searchInput = document.getElementById("coDestinationSearch");
+    const resultsContainer = document.getElementById("destinationResults");
+    if (searchInput && resultsContainer && !searchInput.contains(event.target) && !resultsContainer.contains(event.target)) {
+        resultsContainer.classList.add("hidden");
+    }
+});
+
+async function cekOngkir() {
+    const kurirSelect = document.getElementById("coKurir");
+    const idKotaTujuan = document.getElementById("coDestinationId")?.value;
+
+    if (!idKotaTujuan) return;
+
+    // Hitung total berat dari keranjang (default: 1 produk = 1000 gram)
+    let totalWeight = 0;
+    cartItems.forEach(item => {
+        totalWeight += (item.weight || 1000) * item.qty;
+    });
+    if (totalWeight === 0) totalWeight = 1000;
+
+    kurirSelect.innerHTML = `<option value="">Memuat layanan kurir (${totalWeight / 1000} Kg)...</option>`;
+    kurirSelect.disabled = true;
+
+    // ID Kota Pengirim Komerce sesuai pengaturan (16519)
+    const originKota = 16519;
+
+    try {
+        const response = await fetch('api/rajaongkir_cost.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                origin: originKota,
+                destination: idKotaTujuan,
+                weight: totalWeight,
+                courier: 'jne'
+            })
         });
-    } catch (error) {
-        console.error("Error loading provinces:", error);
+
+        const data = await response.json();
+        kurirSelect.innerHTML = `<option value="">Pilih Layanan JNE (Total Berat: ${totalWeight / 1000} Kg)</option>`;
+
+        if (data && data.meta && data.meta.code === 200 && data.data) {
+            data.data.forEach(c => {
+                const serviceName = c.service;
+                const costValue = c.cost;
+                const etd = c.etd;
+
+                // Pemetaan nama awam agar dimengerti pembeli
+                let friendlyName = serviceName;
+                const s = serviceName.toUpperCase();
+
+                // --- FILTER: Hanya tampilkan Reguler dan Kargo JTR Dasar ---
+                if (!(s === 'CTC' || s === 'REG' || s === 'JTR')) {
+                    return; // Lewati / sembunyikan layanan lain (JTR>130, YES, OKE, SPS, dsb)
+                }
+
+                if (s === 'JTR') friendlyName = 'Kargo JTR';
+                else if (s === 'CTC' || s === 'REG') friendlyName = 'Reguler';
+
+                const option = document.createElement("option");
+                // Simpan harganya di value (dipisah dash)
+                option.value = `JNE-${serviceName}-${costValue}`;
+
+                // Ubah tulisan "day" jadi "Hari"
+                let etdText = etd ? etd.replace('day', 'Hari') : '';
+                let labelWaktu = etdText ? `(${etdText})` : '';
+
+                option.textContent = `JNE ${friendlyName} ${labelWaktu} - Rp ${costValue.toLocaleString('id-ID')}`;
+                kurirSelect.appendChild(option);
+            });
+            kurirSelect.disabled = false;
+        } else {
+            kurirSelect.innerHTML = '<option value="">Gagal mendapatkan api (Cek API Key)</option>';
+            console.log("RajaOngkir Error:", data);
+        }
+    } catch (err) {
+        console.error("Fetch cost error:", err);
+        kurirSelect.innerHTML = '<option value="">Error mendapatkan ongkir</option>';
+    }
+
+    currentOngkir = 0;
+    updateTotalBayar();
+}
+
+function updateTotalBayar() {
+    const kurirSelect = document.getElementById("coKurir");
+    const ongkirLabel = document.getElementById("coOngkirLabel");
+    const totalLabel = document.getElementById("coTotalBayarLabel");
+    const btnBayar = document.getElementById("btnBayarMidtrans");
+
+    if (kurirSelect && kurirSelect.value) {
+        // Ekstrak ongkir dari value dummy (format: KODE-15000)
+        const parts = kurirSelect.value.split('-');
+        currentOngkir = parseInt(parts[parts.length - 1], 10);
+        if (ongkirLabel) ongkirLabel.textContent = `Rp ${currentOngkir.toLocaleString('id-ID')}`;
+    } else {
+        currentOngkir = 0;
+        if (ongkirLabel) ongkirLabel.textContent = "Pilih Kurir Dahulu";
+    }
+
+    const grandTotal = currentTotalProduk + currentOngkir;
+    if (totalLabel) totalLabel.textContent = `Rp ${grandTotal.toLocaleString('id-ID')}`;
+
+    if (btnBayar) {
+        btnBayar.disabled = !(currentOngkir > 0 && currentTotalProduk > 0);
     }
 }
 
-async function loadKabupaten(provinsiId) {
-    const selectKabupaten = document.getElementById("coKabupaten");
-    const selectKecamatan = document.getElementById("coKecamatan");
-    if (!selectKabupaten || !selectKecamatan) return;
-
-    selectKabupaten.innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
-    selectKecamatan.innerHTML = '<option value="">Pilih Kecamatan</option>';
-    selectKabupaten.disabled = true;
-    selectKabupaten.classList.add("bg-gray-50");
-    selectKecamatan.disabled = true;
-    selectKecamatan.classList.add("bg-gray-50");
-
-    if (!provinsiId) return;
-
-    try {
-        selectKabupaten.disabled = false;
-        selectKabupaten.classList.remove("bg-gray-50");
-
-        const response = await fetch(`${_CO_API}/regencies/${provinsiId}.json`);
-        const data = await response.json();
-
-        data.forEach((kab) => {
-            const option = document.createElement("option");
-            option.value = kab.id;
-            option.textContent = kab.name;
-            selectKabupaten.appendChild(option);
-        });
-    } catch (error) {
-        console.error("Error loading regencies:", error);
-    }
-}
-
-async function loadKecamatan(kabupatenId) {
-    const selectKecamatan = document.getElementById("coKecamatan");
-    if (!selectKecamatan) return;
-
-    selectKecamatan.innerHTML = '<option value="">Pilih Kecamatan</option>';
-    selectKecamatan.disabled = true;
-    selectKecamatan.classList.add("bg-gray-50");
-
-    if (!kabupatenId) return;
-
-    try {
-        selectKecamatan.disabled = false;
-        selectKecamatan.classList.remove("bg-gray-50");
-
-        const response = await fetch(`${_CO_API}/districts/${kabupatenId}.json`);
-        const data = await response.json();
-
-        data.forEach((kec) => {
-            const option = document.createElement("option");
-            option.value = kec.id;
-            option.textContent = kec.name;
-            selectKecamatan.appendChild(option);
-        });
-    } catch (error) {
-        console.error("Error loading districts:", error);
-    }
-}
-
-function processCheckout(e) {
+async function processCheckout(e) {
     e.preventDefault();
 
+    const btnSubmit = document.getElementById("btnBayarMidtrans");
+    const originalText = btnSubmit.innerHTML;
+    btnSubmit.disabled = true;
+    btnSubmit.innerHTML = `<span class="iconify animate-spin" data-icon="mdi:loading"></span> Memproses...`;
+
+    const payload = {
+        name: document.getElementById("coName")?.value.trim(),
+        phone: document.getElementById("coPhone")?.value.trim(),
+        email: document.getElementById("coEmail")?.value.trim(),
+        destination: document.getElementById("coDestinationSearch")?.value.trim(),
+        address: document.getElementById("coAddress")?.value.trim(),
+        notes: document.getElementById("coNotes")?.value.trim(),
+        courierName: document.getElementById("coKurir")?.options[document.getElementById("coKurir").selectedIndex]?.text || "JNE",
+        shippingCost: currentOngkir,
+        cartItems: cartItems
+    };
+
+    try {
+        const response = await fetch('api/checkout.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success' && data.token) {
+            // Panggil Snap Midtrans
+            window.snap.pay(data.token, {
+                onSuccess: function (result) {
+                    alert("Pembayaran Berhasil! Pesanan Anda akan segera diproses.");
+                    cartItems = [];
+                    saveCart();
+                    window.location.reload();
+                },
+                onPending: function (result) {
+                    alert("Menunggu Pembayaran. Silakan selesaikan pembayaran Anda.");
+                },
+                onError: function (result) {
+                    alert("Pembayaran Gagal. Silakan coba lagi.");
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = originalText;
+                },
+                onClose: function () {
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = originalText;
+                }
+            });
+        } else {
+            alert("Gagal memproses checkout: " + (data.message || "Error tidak diketahui"));
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = originalText;
+        }
+    } catch (err) {
+        console.error("Checkout Request Error:", err);
+        alert("Terjadi kesalahan koneksi saat memproses checkout.");
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = originalText;
+    }
+}
+
+function checkoutViaWA() {
     const name = document.getElementById("coName")?.value.trim() || "";
     const phone = document.getElementById("coPhone")?.value.trim() || "";
-    const size = document.querySelector('input[name="coSize"]:checked')?.value || "";
-    const qty = document.getElementById("coQty")?.value || "1";
+    const email = document.getElementById("coEmail")?.value.trim() || "";
 
-    const provSelect = document.getElementById("coProvinsi");
-    const kabSelect = document.getElementById("coKabupaten");
-    const kecSelect = document.getElementById("coKecamatan");
-
-    const provText = provSelect?.options[provSelect.selectedIndex]?.text || "";
-    const kabText = kabSelect?.options[kabSelect.selectedIndex]?.text || "";
-    const kecText = kecSelect?.options[kecSelect.selectedIndex]?.text || "";
-
+    const destText = document.getElementById("coDestinationSearch")?.value.trim() || "";
     const detailAddress = document.getElementById("coAddress")?.value.trim() || "";
     const notes = document.getElementById("coNotes")?.value.trim() || "";
+    const kurir = document.getElementById("coKurir")?.options[document.getElementById("coKurir").selectedIndex]?.text || "Belum dipilih";
+
+    let orderList = "";
+    cartItems.forEach(item => {
+        orderList += `- ${item.qty}x ${item.name} (Rp ${(item.price * item.qty).toLocaleString('id-ID')})\n`;
+    });
 
     const adminWA = "6285188789052";
 
-    const message = `Halo Admin Mocafie, saya ingin memesan Tepung Mocaf:
-
-*--- DATA PEMESAN ---*
-Nama: ${name}
-No. WA: ${phone}
-
-*--- DETAIL PESANAN ---*
-Produk: Tepung Mocafie
-Ukuran: *${size}*
-Jumlah: *${qty} Pcs*
-
-*--- ALAMAT PENGIRIMAN ---*
-${detailAddress}
-Kec. ${kecText}, ${kabText}
-Prov. ${provText}
-
-${notes ? `*--- CATATAN ---*\n${notes}` : ""}
-
-Mohon info total biaya + ongkir serta rekening pembayarannya ya. Terima kasih!`;
+    const message = `Halo Admin Mocafie, saya ingin memesan Tepung Mocaf:\n\n*--- DATA PEMESAN ---*\nNama: ${name}\nNo. WA: ${phone}\nEmail: ${email}\n\n*--- DETAIL PESANAN ---*\n${orderList}\n*--- ALAMAT PENGIRIMAN ---*\n${detailAddress}\nWilayah: ${destText}\nKurir: ${kurir}\n${notes ? `\n*--- CATATAN ---*\n${notes}` : ""}\n\nMohon info rekening pembayarannya ya. Terima kasih!`;
 
     window.open(`https://wa.me/${adminWA}?text=${encodeURIComponent(message)}`, "_blank");
     closeCheckoutModal();
 }
 
+
+// ===== Shopping Cart Logic =====
+let cartItems = [];
+
+function loadCart() {
+    const saved = localStorage.getItem('mocafie_cart');
+    if (saved) {
+        try {
+            cartItems = JSON.parse(saved);
+        } catch (e) {
+            cartItems = [];
+        }
+    }
+    renderCart();
+}
+
+function saveCart() {
+    localStorage.setItem('mocafie_cart', JSON.stringify(cartItems));
+    renderCart();
+}
+
+function addToCart(id, name, price, weight, image) {
+    const existing = cartItems.find(item => item.id === id);
+    if (existing) {
+        existing.qty += 1;
+    } else {
+        cartItems.push({ id, name, price, weight, image, qty: 1 });
+    }
+    saveCart();
+
+    // Langsung buka sidebar setelah menambah
+    toggleCartSidebar();
+}
+
+function updateCartQuantity(id, change) {
+    const item = cartItems.find(i => i.id === id);
+    if (item) {
+        item.qty += change;
+        if (item.qty <= 0) {
+            removeFromCart(id);
+            return;
+        }
+        saveCart();
+    }
+}
+
+function removeFromCart(id) {
+    cartItems = cartItems.filter(item => item.id !== id);
+    saveCart();
+}
+
+function renderCart() {
+    const container = document.getElementById('cartItemsContainer');
+    const badgeDesktop = document.getElementById('cartCountDesktop');
+    const badgeMobile = document.getElementById('cartCountMobile');
+    const subtotalEl = document.getElementById('cartSubtotal');
+    const btnCheckout = document.getElementById('btnProceedCheckout');
+
+    if (!container) return;
+
+    let totalQty = 0;
+    let subtotal = 0;
+
+    if (cartItems.length === 0) {
+        container.innerHTML = `
+            <div class="flex flex-col items-center justify-center h-full text-gray-400 gap-3">
+                <span class="iconify text-5xl opacity-50" data-icon="mdi:cart-remove"></span>
+                <p>Keranjang Anda masih kosong</p>
+                <button onclick="toggleCartSidebar()" class="mt-2 text-sm text-primary hover:underline font-medium focus:outline-none">Lanjut Belanja</button>
+            </div>
+        `;
+        if (btnCheckout) btnCheckout.disabled = true;
+    } else {
+        let html = '';
+        cartItems.forEach(item => {
+            totalQty += item.qty;
+            subtotal += (item.price * item.qty);
+
+            html += `
+                <div class="flex gap-4 p-3 bg-white border border-gray-100 rounded-xl shadow-sm relative animate-fade-in-up">
+                    <img src="${item.image}" alt="${item.name}" class="w-20 h-20 object-cover rounded-lg bg-gray-50 border border-gray-100">
+                    <div class="flex-1 flex flex-col justify-between py-1">
+                        <div class="pr-6">
+                            <h4 class="font-bold text-sm text-gray-900 leading-tight">${item.name}</h4>
+                            <p class="text-primary font-bold text-sm mt-1">Rp ${item.price.toLocaleString('id-ID')}</p>
+                        </div>
+                        <div class="flex items-center justify-between mt-2">
+                            <div class="flex items-center bg-gray-50 rounded-lg border border-gray-200">
+                                <button onclick="updateCartQuantity('${item.id}', -1)" class="w-7 h-7 flex items-center justify-center text-gray-500 hover:text-primary transition-colors focus:outline-none">-</button>
+                                <span class="w-8 text-center text-sm font-semibold">${item.qty}</span>
+                                <button onclick="updateCartQuantity('${item.id}', 1)" class="w-7 h-7 flex items-center justify-center text-gray-500 hover:text-primary transition-colors focus:outline-none">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="removeFromCart('${item.id}')" class="absolute top-2 right-2 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors focus:outline-none" aria-label="Hapus Item">
+                        <span class="iconify text-lg" data-icon="mdi:trash-can-outline"></span>
+                    </button>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+        if (btnCheckout) btnCheckout.disabled = false;
+    }
+
+    // Update Badges
+    [badgeDesktop, badgeMobile].forEach(badge => {
+        if (badge) {
+            badge.textContent = totalQty;
+            if (totalQty > 0) badge.classList.remove('hidden');
+            else badge.classList.add('hidden');
+        }
+    });
+
+    // Update Subtotal
+    if (subtotalEl) {
+        subtotalEl.textContent = `Rp ${subtotal.toLocaleString('id-ID')}`;
+    }
+}
+
+function toggleCartSidebar() {
+    const sidebar = document.getElementById('cartSidebar');
+    const overlay = document.getElementById('cartOverlay');
+
+    if (!sidebar || !overlay) return;
+
+    const isClosed = sidebar.classList.contains('translate-x-full');
+
+    if (isClosed) {
+        sidebar.classList.remove('translate-x-full');
+        overlay.classList.remove('hidden');
+        // small delay for transition
+        setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+        document.body.style.overflow = "hidden";
+        renderCart(); // render on open to ensure fresh state
+    } else {
+        sidebar.classList.add('translate-x-full');
+        overlay.classList.add('opacity-0');
+        setTimeout(() => overlay.classList.add('hidden'), 300);
+        document.body.style.overflow = "";
+    }
+}
+
+function proceedToCheckout() {
+    if (cartItems.length === 0) return;
+    toggleCartSidebar(); // close sidebar
+    setTimeout(() => {
+        openCheckoutModal(); // open checkout modal
+    }, 300);
+}
+
+// Inisialisasi keranjang saat load
+document.addEventListener("DOMContentLoaded", () => {
+    loadCart();
+});

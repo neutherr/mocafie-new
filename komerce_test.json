@@ -1,0 +1,18 @@
+{
+  "meta": {
+    "message": "Success Get Domestic Destinations",
+    "code": 200,
+    "status": "success"
+  },
+  "data": [
+    {
+      "id": 31517,
+      "label": "CATUR HARJO, SLEMAN, SLEMAN, DI YOGYAKARTA, 55515",
+      "province_name": "DI YOGYAKARTA",
+      "city_name": "SLEMAN",
+      "district_name": "SLEMAN",
+      "subdistrict_name": "CATUR HARJO",
+      "zip_code": "55515"
+    }
+  ]
+}
