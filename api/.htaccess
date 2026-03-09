@@ -1,0 +1,35 @@
+# api/.htaccess
+# ============================================================
+# Keamanan folder /api/
+# ============================================================
+
+# --- Blokir akses langsung ke file konfigurasi & env ---
+<FilesMatch "^(config\.php|\.env)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# --- Security Headers untuk semua response dari /api/ ---
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "DENY"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    # Hapus header yang mengekspos versi server
+    Header unset X-Powered-By
+    Header unset Server
+</IfModule>
+
+# --- Blokir akses ke file log jika ada ---
+<FilesMatch "\.log$|\.txt$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# --- Nonaktifkan directory listing ---
+Options -Indexes
+
+# --- Izinkan hanya file PHP yang diakses langsung ---
+<FilesMatch "^(?!checkout|notification|rajaongkir_cost|rajaongkir_destination).*\.php$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>

@@ -1,64 +1,74 @@
 <?php
 // api/notification.php
-// Script ini digunakan untuk menerima Webhook / Notifikasi dari Midtrans
-// ketika pembeli berhasil melakukan pembayaran.
+// Webhook / Notifikasi dari Midtrans ketika pembayaran berhasil.
 
 header('Content-Type: application/json');
 require_once 'config.php';
+addCorsHeaders();
 
-// Midtrans Server Key (Diambil dari config.php ketika Anda sudah mengubahnya nanti)
-$serverKey = MIDTRANS_SERVER_KEY;
-
-// Mengambil raw body dari Midtrans
+$serverKey  = MIDTRANS_SERVER_KEY;
 $rawPayload = file_get_contents('php://input');
 $notification = json_decode($rawPayload, true);
 
-if (!$notification) {
+if (!$notification || !is_array($notification)) {
     http_response_code(400);
-    echo json_encode(["status" => "error", "message" => "Format notifikasi tidak valid"]);
+    echo json_encode(['status' => 'error', 'message' => 'Format notifikasi tidak valid']);
     exit;
 }
 
 // Data dari notifikasi Midtrans
-$orderId = isset($notification['order_id']) ? $notification['order_id'] : '';
-$statusCode = isset($notification['status_code']) ? $notification['status_code'] : '';
-$grossAmount = isset($notification['gross_amount']) ? $notification['gross_amount'] : '';
-$transactionStatus = isset($notification['transaction_status']) ? $notification['transaction_status'] : '';
-$signatureKey = isset($notification['signature_key']) ? $notification['signature_key'] : '';
+$orderId           = isset($notification['order_id'])           ? htmlspecialchars($notification['order_id'],           ENT_QUOTES, 'UTF-8') : '';
+$statusCode        = isset($notification['status_code'])        ? htmlspecialchars($notification['status_code'],        ENT_QUOTES, 'UTF-8') : '';
+$grossAmount       = isset($notification['gross_amount'])       ? htmlspecialchars($notification['gross_amount'],       ENT_QUOTES, 'UTF-8') : '';
+$transactionStatus = isset($notification['transaction_status']) ? htmlspecialchars($notification['transaction_status'], ENT_QUOTES, 'UTF-8') : '';
+$signatureKey      = isset($notification['signature_key'])      ? $notification['signature_key'] : '';
 
-// 1. Verifikasi Keaslian Notifikasi (Signature Key)
-// Rumus Signature: SHA512(order_id + status_code + gross_amount + server_key)
-$calculatedSignature = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
-
-if ($signatureKey !== $calculatedSignature) {
-    http_response_code(401);
-    echo json_encode(["status" => "error", "message" => "Signature Key tidak valid / Ditolak!"]);
+// Validasi field wajib
+if (empty($orderId) || empty($statusCode) || empty($grossAmount) || empty($signatureKey)) {
+    http_response_code(400);
+    echo json_encode(['status' => 'error', 'message' => 'Field notifikasi tidak lengkap']);
     exit;
 }
 
-// 2. Pantau Status Pembayaran
-if ($transactionStatus == 'capture' || $transactionStatus == 'settlement') {
-    // PEMBAYARAN SUKSES / LUNAS
-    // TODO: Di sinilah Anda menambahkan kode untuk:
-    // a. Menyimpan status "LUNAS" ke dalam Database MySQL (jika Anda pakai database)
-    // b. Mengurangi stok produk di database
-    // c. Mengirim email konfirmasi / WhatsApp otomatis ke Admin atau Pembeli
-    
-    // Contoh log pembayaran sukses ke file komputer Anda (hanya untuk testing)
-    $logData = date("Y-m-d H:i:s") . " - PESANAN LUNAS: " . $orderId . " | Nominal: " . $grossAmount . "\n";
-    file_put_contents('payment_success_log.txt', $logData, FILE_APPEND);
+// ============================================================
+//  VERIFIKASI SIGNATURE (Otentikasi Notifikasi)
+//  Rumus: SHA512(order_id + status_code + gross_amount + server_key)
+// ============================================================
+$calculatedSignature = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
 
-    echo json_encode(["status" => "success", "message" => "Pembayaran berhasil diproses"]);
-
-} else if ($transactionStatus == 'pending') {
-    // PEMBAYARAN TERTUNDA (Customer sudah checkout masuk Snap, tapi belum ke ATM/Transfer)
-    echo json_encode(["status" => "pending", "message" => "Menunggu pembayaran customer"]);
-
-} else if ($transactionStatus == 'deny' || $transactionStatus == 'expire' || $transactionStatus == 'cancel') {
-    // PEMBAYARAN GAGAL / KADALUARSA
-    // TODO: Kembalikan stok produk jika sempat dikurangi 
-    echo json_encode(["status" => "failed", "message" => "Pembayaran gagal atau kadaluarsa"]);
-} else {
-    echo json_encode(["status" => "unknown", "message" => "Status tidak dikenali"]);
+if (!hash_equals($calculatedSignature, $signatureKey)) {
+    http_response_code(401);
+    echo json_encode(['status' => 'error', 'message' => 'Signature tidak valid']);
+    exit;
 }
-?>
+
+// ============================================================
+//  PROSES STATUS PEMBAYARAN
+// ============================================================
+if ($transactionStatus === 'capture' || $transactionStatus === 'settlement') {
+    // PEMBAYARAN SUKSES / LUNAS
+    // FIX KEAMANAN: Gunakan error_log() (masuk server log, tidak bisa diakses publik)
+    // Tidak menulis ke payment_success_log.txt di webroot
+    $logEntry = '[MOCAFIE PAYMENT] ' . date('Y-m-d H:i:s')
+        . ' | STATUS: LUNAS'
+        . ' | ORDER: ' . $orderId
+        . ' | NOMINAL: Rp ' . $grossAmount;
+    error_log($logEntry);
+
+    // TODO: Tambahkan kode untuk:
+    // a. Simpan status "LUNAS" ke Database MySQL
+    // b. Kurangi stok produk di database
+    // c. Kirim email/WhatsApp konfirmasi ke Admin & Pembeli
+
+    echo json_encode(['status' => 'success', 'message' => 'Pembayaran berhasil diproses']);
+
+} elseif ($transactionStatus === 'pending') {
+    echo json_encode(['status' => 'pending', 'message' => 'Menunggu pembayaran customer']);
+
+} elseif (in_array($transactionStatus, ['deny', 'expire', 'cancel'], true)) {
+    // TODO: Kembalikan stok produk jika sempat dikurangi
+    echo json_encode(['status' => 'failed', 'message' => 'Pembayaran gagal atau kadaluarsa']);
+
+} else {
+    echo json_encode(['status' => 'unknown', 'message' => 'Status tidak dikenali: ' . $transactionStatus]);
+}

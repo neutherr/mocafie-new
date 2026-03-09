@@ -1,0 +1,33 @@
+# ============================================================
+# Mocafie - Root .htaccess Security
+# ============================================================
+
+# --- Blokir akses ke file .env (PENTING!) ---
+<Files ".env">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+# --- Blokir akses ke file .gitignore ---
+<Files ".gitignore">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+# --- Security Headers Global ---
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header unset X-Powered-By
+</IfModule>
+
+# --- Nonaktifkan directory listing ---
+Options -Indexes
+
+# --- Force HTTPS (aktifkan jika sudah punya SSL) ---
+# <IfModule mod_rewrite.c>
+#     RewriteEngine On
+#     RewriteCond %{HTTPS} off
+#     RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+# </IfModule>

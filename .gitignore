@@ -1,0 +1,32 @@
+# ============================================================
+# Mocafie - .gitignore
+# ============================================================
+
+# === RAHASIA - API Keys & Environment ===
+.env
+*.env.local
+*.env.production
+
+# === Log files ===
+*.log
+*.txt.log
+payment_success_log.txt
+api/payment_success_log.txt
+
+# === Rate limiting temp files ===
+# (dibuat otomatis oleh api/config.php)
+
+# === OS Files ===
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# === Editor Files ===
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# === Temporary Files ===
+*.tmp
+*.cache

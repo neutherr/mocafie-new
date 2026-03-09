@@ -3,121 +3,179 @@
 header('Content-Type: application/json');
 require_once 'config.php';
 
-// Terima payload JSON dari frontend
-$input_raw = file_get_contents('php://input');
-$input = json_decode($input_raw, true);
+// --- CORS & Rate Limiting ---
+addCorsHeaders();
+checkRateLimit('checkout', 5, 60); // Maks 5 kali checkout per IP per menit
 
-if (!$input) {
-    echo json_encode(['status' => 'error', 'message' => 'Invalid JSON payload']);
+// ============================================================
+//  SERVER-SIDE PRODUCT CATALOG
+//  CRITICAL FIX: Harga dan berat ditetapkan di SERVER, bukan
+//  diambil dari client. Client hanya mengirim ID produk & qty.
+// ============================================================
+const PRODUCT_CATALOG = [
+    'PRD-1KG' => [
+        'name'   => 'Tepung Mocafie Serbaguna 1kg',
+        'price'  => 25000,   // Rp 25.000
+        'weight' => 1000,    // gram
+    ],
+    // Tambahkan produk baru di sini jika ada
+    // 'PRD-500G' => ['name' => '...', 'price' => 14000, 'weight' => 500],
+];
+
+// --- Baca & validasi payload JSON ---
+$input_raw = file_get_contents('php://input');
+$input     = json_decode($input_raw, true);
+
+if (!$input || !is_array($input)) {
+    http_response_code(400);
+    echo json_encode(['status' => 'error', 'message' => 'Payload JSON tidak valid']);
     exit;
 }
 
-$cartItems = isset($input['cartItems']) ? $input['cartItems'] : [];
-$shippingCost = isset($input['shippingCost']) ? (int)$input['shippingCost'] : 0;
-$courierName = isset($input['courierName']) ? $input['courierName'] : 'Kurir';
+// ============================================================
+//  SANITASI INPUT CUSTOMER
+// ============================================================
+$name         = htmlspecialchars(strip_tags(trim($input['name']         ?? 'Customer')), ENT_QUOTES, 'UTF-8');
+$phone        = preg_replace('/[^0-9+\-\s]/', '', trim($input['phone']  ?? ''));
+$email        = filter_var(trim($input['email'] ?? ''), FILTER_VALIDATE_EMAIL) ?: 'no-email@example.com';
+$destText     = htmlspecialchars(strip_tags(trim($input['destination']  ?? '')), ENT_QUOTES, 'UTF-8');
+$detailAddress= htmlspecialchars(strip_tags(trim($input['address']      ?? '')), ENT_QUOTES, 'UTF-8');
+$courierName  = htmlspecialchars(strip_tags(trim($input['courierName']  ?? 'JNE')), ENT_QUOTES, 'UTF-8');
 
-// Info Customer
-$name = isset($input['name']) ? $input['name'] : 'Customer';
-$phone = isset($input['phone']) ? $input['phone'] : '';
-$email = isset($input['email']) ? $input['email'] : 'no-email@example.com';
-$destText = isset($input['destination']) ? $input['destination'] : '';
-$detailAddress = isset($input['address']) ? $input['address'] : '';
+// Ambil shipping cost dari input (ini aman karena harga produk dari catalog server)
+$shippingCost = max(0, (int)($input['shippingCost'] ?? 0));
 
-// 1. Susun order_id dan harga
-$orderId = 'MCF-' . time() . '-' . rand(100, 999);
+// Validasi minimal
+if (empty($name) || $name === 'Customer') $name = 'Customer';
+if (strlen($name) > 100) $name = substr($name, 0, 100);
+if (strlen($detailAddress) > 500) $detailAddress = substr($detailAddress, 0, 500);
+
+// ============================================================
+//  BUILD ORDER DARI SERVER-SIDE CATALOG
+//  Abaikan harga dari client, gunakan harga dari PRODUCT_CATALOG
+// ============================================================
+$cartItems   = isset($input['cartItems']) && is_array($input['cartItems']) ? $input['cartItems'] : [];
+$orderId     = 'MCF-' . time() . '-' . rand(100, 999);
 $grossAmount = 0;
 $itemDetails = [];
 
+if (empty($cartItems)) {
+    http_response_code(400);
+    echo json_encode(['status' => 'error', 'message' => 'Keranjang belanja kosong']);
+    exit;
+}
+
 foreach ($cartItems as $item) {
-    $price = (int)$item['price'];
-    $qty = (int)$item['qty'];
+    $itemId = htmlspecialchars(strip_tags(trim($item['id'] ?? '')), ENT_QUOTES, 'UTF-8');
+
+    // Pastikan produk dikenal oleh server
+    if (!isset(PRODUCT_CATALOG[$itemId])) {
+        http_response_code(400);
+        echo json_encode([
+            'status'  => 'error',
+            'message' => 'Produk tidak dikenal: ' . $itemId,
+        ]);
+        exit;
+    }
+
+    $product = PRODUCT_CATALOG[$itemId];
+    $price   = $product['price'];                    // ← Harga dari SERVER
+    $qty     = max(1, min(100, (int)($item['qty'] ?? 1))); // Batasi qty 1–100
     $grossAmount += ($price * $qty);
-    
+
     $itemDetails[] = [
-        'id' => $item['id'],
-        'price' => $price,
+        'id'       => $itemId,
+        'price'    => $price,
         'quantity' => $qty,
-        'name' => substr($item['name'], 0, 50)
+        'name'     => substr($product['name'], 0, 50),
     ];
 }
 
-// Tambahkan ongkir sebagai salah satu "item" agar tercatat di rincian Midtrans
+// Tambahkan ongkir sebagai item Midtrans
 if ($shippingCost > 0) {
-    $grossAmount += $shippingCost;
+    $grossAmount   += $shippingCost;
     $itemDetails[] = [
-        'id' => 'SHIPPING',
-        'price' => $shippingCost,
+        'id'       => 'SHIPPING',
+        'price'    => $shippingCost,
         'quantity' => 1,
-        'name' => 'Ongkos Kirim (' . $courierName . ')'
+        'name'     => 'Ongkos Kirim (' . substr($courierName, 0, 30) . ')',
     ];
 }
 
 if ($grossAmount <= 0) {
+    http_response_code(400);
     echo json_encode(['status' => 'error', 'message' => 'Total pembayaran tidak valid']);
     exit;
 }
 
-// 2. Siapkan Parameter Midtrans Snap
-$midtrans_url = MIDTRANS_IS_PRODUCTION 
-    ? 'https://app.midtrans.com/snap/v1/transactions' 
+// ============================================================
+//  PANGGIL API MIDTRANS SNAP
+// ============================================================
+$midtrans_url = MIDTRANS_IS_PRODUCTION
+    ? 'https://app.midtrans.com/snap/v1/transactions'
     : 'https://app.sandbox.midtrans.com/snap/v1/transactions';
 
 $transaction_data = [
     'transaction_details' => [
-        'order_id' => $orderId,
+        'order_id'     => $orderId,
         'gross_amount' => $grossAmount,
     ],
-    'item_details' => $itemDetails,
+    'item_details'     => $itemDetails,
     'customer_details' => [
         'first_name' => $name,
-        'email' => $email,
-        'phone' => $phone,
+        'email'      => $email,
+        'phone'      => $phone,
         'shipping_address' => [
-            'first_name' => $name,
-            'phone' => $phone,
-            'address' => $detailAddress,
-            'city' => $destText,
-            'country_code' => 'IDN'
-        ]
-    ]
+            'first_name'   => $name,
+            'phone'        => $phone,
+            'address'      => $detailAddress,
+            'city'         => $destText,
+            'country_code' => 'IDN',
+        ],
+    ],
 ];
 
-// 3. Panggil API Midtrans
 $ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, $midtrans_url);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-curl_setopt($ch, CURLOPT_POST, 1);
-curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($transaction_data));
-curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-    'Content-Type: application/json',
-    'Accept: application/json',
-    'Authorization: Basic ' . base64_encode(MIDTRANS_SERVER_KEY . ':')
-));
+curl_setopt_array($ch, [
+    CURLOPT_URL            => $midtrans_url,
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_POST           => true,
+    CURLOPT_POSTFIELDS     => json_encode($transaction_data),
+    CURLOPT_HTTPHEADER     => [
+        'Content-Type: application/json',
+        'Accept: application/json',
+        'Authorization: Basic ' . base64_encode(MIDTRANS_SERVER_KEY . ':'),
+    ],
+    CURLOPT_TIMEOUT        => 30,
+]);
 
-$result = curl_exec($ch);
-$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+$result    = curl_exec($ch);
+$httpCode  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 $curlError = curl_error($ch);
 curl_close($ch);
 
 if ($curlError) {
-    echo json_encode(['status' => 'error', 'message' => 'cURL Error: ' . $curlError]);
+    http_response_code(502);
+    echo json_encode(['status' => 'error', 'message' => 'Gagal terhubung ke Midtrans']);
     exit;
 }
 
 $response = json_decode($result, true);
 
-if ($httpCode == 201 || isset($response['token'])) {
+if ($httpCode === 201 || isset($response['token'])) {
     echo json_encode([
-        'status' => 'success',
-        'token' => $response['token'],
+        'status'       => 'success',
+        'token'        => $response['token'],
         'redirect_url' => $response['redirect_url'] ?? '',
-        'order_id' => $orderId
+        'order_id'     => $orderId,
     ]);
 } else {
+    // Jangan ekspos detail error Midtrans ke client di production
+    http_response_code(502);
     echo json_encode([
-        'status' => 'error',
-        'message' => 'Midtrans Error',
-        'raw' => $response
+        'status'  => 'error',
+        'message' => 'Gagal membuat transaksi. Silakan coba lagi.',
+        // Hanya tampilkan detail di sandbox/development
+        'detail'  => MIDTRANS_IS_PRODUCTION ? null : ($response['error_messages'] ?? $response),
     ]);
 }
-?>
