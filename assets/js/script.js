@@ -733,13 +733,13 @@ async function processCheckout(e) {
                     saveCart();
                     updateCartCount();
 
-                    // Tunda 500ms agar click event Midtrans Snap tidak merembes ke modal kita
+                    // Tunda 1000ms agar semua event dari Midtrans Snap selesai lebih dulu
                     setTimeout(() => {
                         showPaymentResult('success',
                             '🎉 Pembayaran Berhasil!',
                             `Pesanan <strong>${data.order_id}</strong> diterima! Cek email untuk konfirmasi & nantikan kiriman kami dalam 1–2 hari kerja.`
                         );
-                    }, 500);
+                    }, 1000);
                 },
                 onPending: function (result) {
                     showPaymentResult('pending',
@@ -799,10 +799,9 @@ function showPaymentResult(type, title, message) {
             <button onclick="document.getElementById('paymentResultModal').remove()" style="background:${c.btn};color:#fff;border:none;padding:12px 32px;border-radius:8px;font-size:15px;cursor:pointer;font-weight:bold">Tutup</button>
         </div>`;
     document.body.appendChild(modal);
-    // Tunda listener backdrop 500ms agar event klik dari Midtrans tidak langsung menutup modal
-    setTimeout(() => {
-        modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
-    }, 500);
+    // Backdrop click SENGAJA tidak dipasang untuk modal sukses/pending
+    // agar auto-close 5 detik Midtrans Snap tidak merembes dan langsung menutup modal ini.
+    // User harus klik tombol "Tutup" secara eksplisit.
 }
 
 function checkoutViaWA() {
