@@ -723,30 +723,17 @@ async function processCheckout(e) {
             // Panggil Snap Midtrans
             window.snap.pay(data.token, {
                 onSuccess: function (result) {
-                    // Reset tombol
-                    btnSubmit.disabled = false;
-                    btnSubmit.innerHTML = originalText;
+                    // Simpan status sukses ke sessionStorage agar bisa ditampilkan setelah reload
+                    sessionStorage.setItem('payment_success', data.order_id);
 
-                    // Tutup modal checkout (mungkin early-return jika sudah hilang di balik Snap)
-                    closeCheckoutModal();
-
-                    // PAKSA reset scroll lock — Midtrans Snap kadang tidak restore overflow
-                    document.body.style.overflow    = '';
-                    document.body.style.paddingRight = '';
-                    document.documentElement.style.overflow = '';
-
-                    // Bersihkan keranjang
+                    // Bersihkan keranjang di localStorage sebelum reload
                     cartItems = [];
                     saveCart();
-                    updateCartCount();
 
-                    // Tunda 1200ms agar Midtrans benar-benar selesai sebelum modal kita muncul
-                    setTimeout(() => {
-                        showPaymentResult('success',
-                            '🎉 Pembayaran Berhasil!',
-                            `Pesanan <strong>${data.order_id}</strong> diterima! Cek email & nantikan kiriman kami dalam 1–2 hari kerja.`
-                        );
-                    }, 1200);
+                    // Reload halaman (solusi paling reliable):
+                    // - Menghindari scroll lock Midtrans yang tidak ter-restore
+                    // - Modal sukses ditampilkan di halaman yang sudah bersih
+                    window.location.href = window.location.pathname;
                 },
                 onPending: function (result) {
                     showPaymentResult('pending',
@@ -765,8 +752,15 @@ async function processCheckout(e) {
                     btnSubmit.innerHTML = originalText;
                 },
                 onClose: function () {
+                    // Pastikan scroll lock selalu dilepas saat Midtrans popup tertutup 
+                    // (baik setelah bayar maupun dicancel)
+                    document.body.style.overflow    = '';
+                    document.body.style.paddingRight = '';
+                    document.documentElement.style.overflow = '';
+                    
                     btnSubmit.disabled = false;
                     btnSubmit.innerHTML = originalText;
+                    closeCheckoutModal();
                 }
             });
         } else {
@@ -988,4 +982,14 @@ function proceedToCheckout() {
 // Inisialisasi keranjang saat load
 document.addEventListener("DOMContentLoaded", () => {
     loadCart();
+
+    // Cek status pembayaran sukses dari sessionStorage (di-set sebelum reload oleh Midtrans onSuccess)
+    const successOrderId = sessionStorage.getItem('payment_success');
+    if (successOrderId) {
+        sessionStorage.removeItem('payment_success');
+        showPaymentResult('success',
+            '🎉 Pembayaran Berhasil!',
+            `Pesanan <strong>${successOrderId}</strong> diterima! Cek email & nantikan kiriman kami dalam 1–2 hari kerja.`
+        );
+    }
 });
