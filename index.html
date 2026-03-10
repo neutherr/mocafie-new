@@ -55,10 +55,28 @@
     </script>
     <link rel="icon" type="image/svg+xml" href="assets/img/logo.svg">
     <link rel="icon" type="image/png" href="assets/img/logopng.png">
+
+    <!-- === PERFORMANCE: Resource Hints === -->
+    <!-- Preconnect ke CDN penting agar koneksi dibuka lebih awal -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="dns-prefetch" href="https://code.iconify.design">
+    <link rel="dns-prefetch" href="https://api.iconify.design">
+
+    <!-- Preload gambar LCP (hero & logo) agar browser unduh lebih awal -->
+    <!-- DAMPAK: LCP bisa turun ~1-2 detik -->
+    <link rel="preload" as="image" href="assets/img/logopng.webp" fetchpriority="high">
+    <link rel="preload" as="image" href="assets/img/hero-flour.webp" fetchpriority="high">
+
+    <!-- Google Fonts: non-blocking (media trick) -->
+    <!-- Fonts dimuat async, tidak memblokir render awal -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"></noscript>
+
+    <!-- TailwindCSS CDN (harus synchronous untuk config, ini keterbatasan CDN mode) -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Iconify: defer agar tidak memblokir render -->
     <script src="https://code.iconify.design/3/3.1.0/iconify.min.js" defer></script>
     <script>
         tailwind.config = {
@@ -469,48 +487,15 @@
                 <p class="text-gray-500 mt-2">Produk kami telah tersertifikasi dan memenuhi standar keamanan pangan internasional.</p>
             </div>
             
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div class="flex justify-center">
                 <!-- Halal -->
-                <div class="animate-on-scroll anim-scale-in h-full">
+                <div class="animate-on-scroll anim-scale-in h-full w-full max-w-[280px]">
                     <div class="flex flex-col items-center justify-center p-6 bg-white rounded-xl shadow-sm border border-gray-100 hover:border-primary/30 transition-colors h-full">
                         <div class="w-24 h-24 flex items-center justify-center mb-3">
                             <img src="assets/img/halal-logo.jpg" alt="Halal Logo" class="w-full h-full object-contain">
                         </div>
                         <span class="font-bold text-gray-800">HALAL</span>
                         <span class="text-xs text-gray-500 text-center mt-1">Sertifikasi Halal MUI</span>
-                    </div>
-                </div>
-
-                <!-- BPOM -->
-                <div class="animate-on-scroll anim-scale-in delay-100 h-full">
-                    <div class="flex flex-col items-center justify-center p-6 bg-white rounded-xl shadow-sm border border-gray-100 hover:border-primary/30 transition-colors h-full">
-                        <div class="w-24 h-24 flex items-center justify-center mb-3">
-                            <img src="assets/img/bpom-logo.png" alt="BPOM Logo" class="w-full h-full object-contain">
-                        </div>
-                        <span class="font-bold text-gray-800">BPOM RI</span>
-                        <span class="text-xs text-gray-500 text-center mt-1">Izin Edar Resmi</span>
-                    </div>
-                </div>
-
-                <!-- HACCP -->
-                <div class="animate-on-scroll anim-scale-in delay-200 h-full">
-                    <div class="flex flex-col items-center justify-center p-6 bg-white rounded-xl shadow-sm border border-gray-100 hover:border-primary/30 transition-colors h-full">
-                        <div class="w-24 h-24 flex items-center justify-center mb-3">
-                            <img src="assets/img/haccp-logo.png" alt="HACCP Logo" class="w-full h-full object-contain">
-                        </div>
-                        <span class="font-bold text-gray-800">HACCP</span>
-                        <span class="text-xs text-gray-500 text-center mt-1">Hazard Analysis Critical Control Point</span>
-                    </div>
-                </div>
-
-                <!-- ISO -->
-                <div class="animate-on-scroll anim-scale-in delay-300 h-full">
-                    <div class="flex flex-col items-center justify-center p-6 bg-white rounded-xl shadow-sm border border-gray-100 hover:border-primary/30 transition-colors h-full">
-                        <div class="w-24 h-24 flex items-center justify-center mb-3">
-                            <img src="assets/img/iso-logo.png" alt="ISO Logo" class="w-full h-full object-contain">
-                        </div>
-                        <span class="font-bold text-gray-800">ISO</span>
-                        <span class="text-xs text-gray-500 text-center mt-1">Standardisasi Internasional</span>
                     </div>
                 </div>
             </div>
@@ -1215,7 +1200,8 @@
         });
     </script>
     <!-- Midtrans Snap -->
-    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-YOUR_CLIENT_KEY_HERE"></script>
-    <script src="assets/js/script.js?v=20260311" defer></script>
+    <!-- Midtrans Snap: defer agar tidak memblokir thread utama (TBT fix) -->
+    <script src="https://app.midtrans.com/snap/snap.js" data-client-key="Mid-client-1LmZa5YBr7HjWPy-" defer></script>
+    <script src="assets/js/script.js?v=20260312" defer></script>
 </body>
 </html>
