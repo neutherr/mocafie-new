@@ -723,16 +723,28 @@ async function processCheckout(e) {
             // Panggil Snap Midtrans
             window.snap.pay(data.token, {
                 onSuccess: function (result) {
-                    alert("Pembayaran Berhasil! Pesanan Anda akan segera diproses.");
+                    // Tampilkan pesan sukses yang elegan
+                    showPaymentResult('success',
+                        '🎉 Pembayaran Berhasil!',
+                        `Pesanan <strong>${data.order_id}</strong> Anda telah diterima. Cek email untuk konfirmasi & nantikan kiriman kami!`
+                    );
                     cartItems = [];
                     saveCart();
-                    window.location.reload();
+                    updateCartCount();
                 },
                 onPending: function (result) {
-                    alert("Menunggu Pembayaran. Silakan selesaikan pembayaran Anda.");
+                    showPaymentResult('pending',
+                        '⏳ Menunggu Pembayaran',
+                        `Selesaikan pembayaran pesanan <strong>${data.order_id}</strong> sebelum batas waktu. Kami akan kirim notifikasi setelah lunas.`
+                    );
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = originalText;
                 },
                 onError: function (result) {
-                    alert("Pembayaran Gagal. Silakan coba lagi.");
+                    showPaymentResult('error',
+                        '❌ Pembayaran Gagal',
+                        'Transaksi tidak berhasil. Silakan coba lagi atau pilih metode pembayaran lain.'
+                    );
                     btnSubmit.disabled = false;
                     btnSubmit.innerHTML = originalText;
                 },
@@ -752,6 +764,33 @@ async function processCheckout(e) {
         btnSubmit.disabled = false;
         btnSubmit.innerHTML = originalText;
     }
+}
+
+// Tampilkan hasil pembayaran dengan modal elegan (bukan alert)
+function showPaymentResult(type, title, message) {
+    // Hapus modal lama jika ada
+    const existing = document.getElementById('paymentResultModal');
+    if (existing) existing.remove();
+
+    const colors = {
+        success: { bg: '#dcfce7', border: '#16a34a', icon: '🎉', btn: '#16a34a' },
+        pending: { bg: '#fef9c3', border: '#ca8a04', icon: '⏳', btn: '#ca8a04' },
+        error:   { bg: '#fee2e2', border: '#dc2626', icon: '❌', btn: '#dc2626' },
+    };
+    const c = colors[type] || colors.error;
+
+    const modal = document.createElement('div');
+    modal.id = 'paymentResultModal';
+    modal.style.cssText = `position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5)`;
+    modal.innerHTML = `
+        <div style="background:#fff;border-radius:16px;padding:32px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);border-top:4px solid ${c.border}">
+            <div style="font-size:48px;margin-bottom:12px">${c.icon}</div>
+            <h2 style="color:${c.border};margin:0 0 12px;font-size:20px">${title}</h2>
+            <p style="color:#555;line-height:1.6;margin:0 0 24px">${message}</p>
+            <button onclick="document.getElementById('paymentResultModal').remove()" style="background:${c.btn};color:#fff;border:none;padding:12px 32px;border-radius:8px;font-size:15px;cursor:pointer;font-weight:bold">Tutup</button>
+        </div>`;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
 }
 
 function checkoutViaWA() {
