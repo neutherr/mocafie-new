@@ -723,14 +723,21 @@ async function processCheckout(e) {
             // Panggil Snap Midtrans
             window.snap.pay(data.token, {
                 onSuccess: function (result) {
-                    // Tampilkan pesan sukses yang elegan
-                    showPaymentResult('success',
-                        '🎉 Pembayaran Berhasil!',
-                        `Pesanan <strong>${data.order_id}</strong> Anda telah diterima. Cek email untuk konfirmasi & nantikan kiriman kami!`
-                    );
+                    // Reset tombol & tutup modal checkout dulu
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = originalText;
+                    closeCheckoutModal();
+
+                    // Bersihkan keranjang
                     cartItems = [];
                     saveCart();
                     updateCartCount();
+
+                    // Tampilkan pesan sukses yang elegan
+                    showPaymentResult('success',
+                        '🎉 Pembayaran Berhasil!',
+                        `Pesanan <strong>${data.order_id}</strong> diterima! Cek email untuk konfirmasi & nantikan kiriman kami dalam 1–2 hari kerja.`
+                    );
                 },
                 onPending: function (result) {
                     showPaymentResult('pending',
