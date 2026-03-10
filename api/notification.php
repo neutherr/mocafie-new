@@ -178,7 +178,24 @@ if ($isPaid) {
         sendWhatsApp($fonnteToken, $adminPhone, $msgAdmin);
     }
 
-    // ── E. Log sukses ─────────────────────────────────────
+    // ── E. Log sukses (JSON untuk fitur resi) ─────────────────
+    $orderData = [
+        'order_id'    => $orderId,
+        'timestamp'   => date("Y-m-d H:i:s"),
+        'status'      => 'LUNAS',
+        'amount'      => (int) $grossAmount,
+        'payment'     => $paymentType,
+        'name'        => $customerName,
+        'email'       => $customerEmail,
+        'phone'       => $customerPhone,
+        'resi'        => '',         // Diisi admin nanti
+        'courier'     => '',
+    ];
+    $ordersFile = __DIR__ . '/orders.json';
+    $orders = file_exists($ordersFile) ? (json_decode(file_get_contents($ordersFile), true) ?: []) : [];
+    $orders[$orderId] = $orderData;
+    @file_put_contents($ordersFile, json_encode($orders, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
+
     $log = date("Y-m-d H:i:s") . " | LUNAS | {$orderId} | {$customerName} | {$grossAmount}\n";
     @file_put_contents(__DIR__ . '/payment_log.txt', $log, FILE_APPEND | LOCK_EX);
 
