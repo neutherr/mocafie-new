@@ -733,11 +733,13 @@ async function processCheckout(e) {
                     saveCart();
                     updateCartCount();
 
-                    // Tampilkan pesan sukses yang elegan
-                    showPaymentResult('success',
-                        '🎉 Pembayaran Berhasil!',
-                        `Pesanan <strong>${data.order_id}</strong> diterima! Cek email untuk konfirmasi & nantikan kiriman kami dalam 1–2 hari kerja.`
-                    );
+                    // Tunda 500ms agar click event Midtrans Snap tidak merembes ke modal kita
+                    setTimeout(() => {
+                        showPaymentResult('success',
+                            '🎉 Pembayaran Berhasil!',
+                            `Pesanan <strong>${data.order_id}</strong> diterima! Cek email untuk konfirmasi & nantikan kiriman kami dalam 1–2 hari kerja.`
+                        );
+                    }, 500);
                 },
                 onPending: function (result) {
                     showPaymentResult('pending',
@@ -797,7 +799,10 @@ function showPaymentResult(type, title, message) {
             <button onclick="document.getElementById('paymentResultModal').remove()" style="background:${c.btn};color:#fff;border:none;padding:12px 32px;border-radius:8px;font-size:15px;cursor:pointer;font-weight:bold">Tutup</button>
         </div>`;
     document.body.appendChild(modal);
-    modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+    // Tunda listener backdrop 500ms agar event klik dari Midtrans tidak langsung menutup modal
+    setTimeout(() => {
+        modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+    }, 500);
 }
 
 function checkoutViaWA() {
