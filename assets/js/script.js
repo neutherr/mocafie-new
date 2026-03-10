@@ -723,23 +723,30 @@ async function processCheckout(e) {
             // Panggil Snap Midtrans
             window.snap.pay(data.token, {
                 onSuccess: function (result) {
-                    // Reset tombol & tutup modal checkout dulu
+                    // Reset tombol
                     btnSubmit.disabled = false;
                     btnSubmit.innerHTML = originalText;
+
+                    // Tutup modal checkout (mungkin early-return jika sudah hilang di balik Snap)
                     closeCheckoutModal();
+
+                    // PAKSA reset scroll lock — Midtrans Snap kadang tidak restore overflow
+                    document.body.style.overflow    = '';
+                    document.body.style.paddingRight = '';
+                    document.documentElement.style.overflow = '';
 
                     // Bersihkan keranjang
                     cartItems = [];
                     saveCart();
                     updateCartCount();
 
-                    // Tunda 1000ms agar semua event dari Midtrans Snap selesai lebih dulu
+                    // Tunda 1200ms agar Midtrans benar-benar selesai sebelum modal kita muncul
                     setTimeout(() => {
                         showPaymentResult('success',
                             '🎉 Pembayaran Berhasil!',
-                            `Pesanan <strong>${data.order_id}</strong> diterima! Cek email untuk konfirmasi & nantikan kiriman kami dalam 1–2 hari kerja.`
+                            `Pesanan <strong>${data.order_id}</strong> diterima! Cek email & nantikan kiriman kami dalam 1–2 hari kerja.`
                         );
-                    }, 1000);
+                    }, 1200);
                 },
                 onPending: function (result) {
                     showPaymentResult('pending',
@@ -790,7 +797,8 @@ function showPaymentResult(type, title, message) {
 
     const modal = document.createElement('div');
     modal.id = 'paymentResultModal';
-    modal.style.cssText = `position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5)`;
+    // z-index 99999 memastikan modal kita di ATAS semua layer Midtrans Snap
+    modal.style.cssText = `position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6)`;
     modal.innerHTML = `
         <div style="background:#fff;border-radius:16px;padding:32px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);border-top:4px solid ${c.border}">
             <div style="font-size:48px;margin-bottom:12px">${c.icon}</div>
