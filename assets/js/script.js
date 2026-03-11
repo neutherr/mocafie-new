@@ -640,14 +640,15 @@ async function cekOngkir() {
                 else if (s === 'CTC' || s === 'REG') friendlyName = 'Reguler';
 
                 const option = document.createElement("option");
-                // Simpan harganya di value (dipisah dash)
-                option.value = `JNE-${serviceName}-${costValue}`;
+                // Simpan harganya di value — pakai pipe | agar tidak konflik dengan dash di nama layanan
+                const costInt = Math.round(Number(costValue)); // pastikan selalu integer
+                option.value = `JNE|${serviceName}|${costInt}`;
 
                 // Ubah tulisan "day" jadi "Hari"
                 let etdText = etd ? etd.replace('day', 'Hari') : '';
                 let labelWaktu = etdText ? `(${etdText})` : '';
 
-                option.textContent = `JNE ${friendlyName} ${labelWaktu} - Rp ${costValue.toLocaleString('id-ID')}`;
+                option.textContent = `JNE ${friendlyName} ${labelWaktu} - Rp ${costInt.toLocaleString('id-ID')}`;
                 kurirSelect.appendChild(option);
             });
             kurirSelect.disabled = false;
@@ -671,8 +672,8 @@ function updateTotalBayar() {
     const btnBayar = document.getElementById("btnBayarMidtrans");
 
     if (kurirSelect && kurirSelect.value) {
-        // Ekstrak ongkir dari value dummy (format: KODE-15000)
-        const parts = kurirSelect.value.split('-');
+        // Ekstrak ongkir dari value (format: JNE|REG|17000)
+        const parts = kurirSelect.value.split('|');
         currentOngkir = parseInt(parts[parts.length - 1], 10);
         if (ongkirLabel) ongkirLabel.textContent = `Rp ${currentOngkir.toLocaleString('id-ID')}`;
     } else {
