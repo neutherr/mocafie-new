@@ -682,14 +682,21 @@ function updateTotalBayar() {
 
     const grandTotal = currentTotalProduk + currentOngkir;
     if (totalLabel) totalLabel.textContent = `Rp ${grandTotal.toLocaleString('id-ID')}`;
-
-    if (btnBayar) {
-        btnBayar.disabled = !(currentOngkir > 0 && currentTotalProduk > 0);
-    }
 }
 
 async function processCheckout(e) {
     e.preventDefault();
+
+    const kurirSelect = document.getElementById("coKurir");
+    if (!currentOngkir || currentOngkir <= 0) {
+        if (kurirSelect) {
+            kurirSelect.setCustomValidity("Silakan pilih layanan kurir terlebih dahulu.");
+            kurirSelect.reportValidity();
+            // Hapus pesan kustom setelah laporkan agar nggak terkunci
+            setTimeout(() => kurirSelect.setCustomValidity(""), 3000); 
+        }
+        return;
+    }
 
     const btnSubmit = document.getElementById("btnBayarMidtrans");
     const originalText = btnSubmit.innerHTML;
