@@ -991,3 +991,28 @@ document.addEventListener("DOMContentLoaded", () => {
         );
     }
 });
+
+// ===== Contact Form Logic =====
+function submitContactForm() {
+    const name = document.getElementById('contactName')?.value.trim() || '';
+    const subject = document.getElementById('contactSubject')?.value || '';
+    const messageInfo = document.getElementById('contactMessage')?.value.trim() || '';
+    
+    if (!name || !subject || !messageInfo) {
+        alert("Mohon lengkapi semua isian formulir terlebih dahulu.");
+        return;
+    }
+    
+    const adminWA = "6285188789052";
+    
+    const waText = `Halo Admin Mocafie,\n\nSaya menghubungi Anda dari website dengan detail berikut:\n\n*Nama:* ${name}\n*Subjek:* ${subject}\n\n*Pesan:*\n${messageInfo}\n\nMohon bantuannya, terima kasih.`;
+    
+    const waLink = `https://wa.me/${adminWA}?text=${encodeURIComponent(waText)}`;
+    
+    // Buka WhatsApp di tab baru
+    window.open(waLink, '_blank');
+    
+    // Reset form setelah mengirim
+    document.getElementById('contactForm')?.reset();
+}
+
