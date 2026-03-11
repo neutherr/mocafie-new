@@ -8,7 +8,6 @@ require_once 'api/config.php';
 
 $adminPass   = getenv('ADMIN_RESI_PASSWORD') ?: 'mocafie_admin2026';
 $fonnteToken = getenv('FONNTE_TOKEN') ?: '';
-$adminEmail  = getenv('ADMIN_EMAIL')  ?: '';
 
 // ── Autentikasi sesi sederhana ──
 session_start();
@@ -99,7 +98,7 @@ if ($isAuth && isset($_POST['send_resi'])) {
         $sentWa = false;
         if (!empty($customerPhone) && !empty($fonnteToken)) {
             $phone = preg_replace('/[^0-9]/', '', $customerPhone);
-            if (str_starts_with($phone, '0')) $phone = '62' . substr($phone, 1);
+            if (substr($phone, 0, 1) === '0') $phone = '62' . substr($phone, 1);
             $msg = "📦 *Pesanan Anda Sudah Dikirim! — Mocafie*\n\n"
                  . "Halo *{$customerName}*! 🚚\n\n"
                  . "📋 No. Pesanan: {$orderId}\n"
@@ -134,126 +133,435 @@ if ($isAuth && $searchId && isset($orders[$searchId])) {
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Admin Kirim Resi — Mocafie</title>
-<meta name="robots" content="noindex,nofollow">
-<style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Segoe UI',sans-serif;background:#f0fdf4;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-  .card{background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.08);max-width:580px;width:100%;padding:32px}
-  h1{color:#2D6A2B;font-size:22px;margin-bottom:4px}
-  .sub{color:#6b7280;font-size:13px;margin-bottom:24px}
-  label{display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:4px;margin-top:14px}
-  input,select{width:100%;padding:10px 14px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;outline:none}
-  input:focus,select:focus{border-color:#2D6A2B;box-shadow:0 0 0 3px rgba(45,106,43,.1)}
-  .btn{display:block;width:100%;padding:12px;background:#2D6A2B;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:20px}
-  .btn:hover{background:#1f4d1e}
-  .btn-sm{background:#e5e7eb;color:#374151;font-size:13px;font-weight:600;padding:7px 14px;border-radius:8px;border:none;cursor:pointer}
-  .alert{padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:14px}
-  .g{background:#dcfce7;color:#166534;border:1px solid #86efac}
-  .r{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5}
-  .order-box{background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:14px;margin:10px 0;font-size:13px;line-height:1.9}
-  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:12px}
-  th{background:#f0fdf4;color:#166534;padding:8px 10px;text-align:left;font-weight:600}
-  td{padding:8px 10px;border-bottom:1px solid #f0f0f0}
-  .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
-  .bg{background:#dcfce7;color:#166534} .by{background:#fef9c3;color:#854d0e}
-  .tab{display:flex;gap:8px;margin-bottom:18px}
-  .tb{padding:8px 18px;border-radius:8px;border:none;cursor:pointer;font-weight:600;font-size:13px;background:#e5e7eb;color:#374151}
-  .tb.active{background:#2D6A2B;color:#fff}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin — Resi Mocafie</title>
+    <meta name="robots" content="noindex,nofollow">
+    
+    <!-- Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons (Iconify) -->
+    <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        primary: {
+                            50: '#f2fbf5',
+                            100: '#e1f5e8',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d', // Mocafie Green
+                            900: '#14532d',
+                        },
+                        border: 'hsl(var(--border))',
+                        input: 'hsl(var(--input))',
+                        ring: 'hsl(var(--ring))',
+                        background: 'hsl(var(--background))',
+                        foreground: 'hsl(var(--foreground))',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Shadcn-like base styles */
+        :root {
+            --background: 0 0% 100%;
+            --foreground: 222.2 84% 4.9%;
+            --border: 214.3 31.8% 91.4%;
+            --input: 214.3 31.8% 91.4%;
+            --ring: 142.1 76.2% 36.3%; /* Green ring */
+            --radius: 0.5rem;
+        }
+        body { background-color: #f8fafc; color: hsl(var(--foreground)); }
+        
+        .shad-card {
+            background-color: hsl(var(--background));
+            border-radius: var(--radius);
+            border: 1px solid hsl(var(--border));
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.025);
+        }
+        
+        .shad-input {
+            display: flex;
+            height: 2.5rem;
+            width: 100%;
+            border-radius: var(--radius);
+            border: 1px solid hsl(var(--input));
+            background-color: transparent;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .shad-input:focus {
+            outline: none;
+            border-color: hsl(var(--ring));
+            box-shadow: 0 0 0 2px rgba(21, 128, 61, 0.2);
+        }
+        .shad-input:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .shad-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            line-height: 1.25;
+            margin-bottom: 0.375rem;
+            display: block;
+            color: #334155;
+        }
+        
+        .shad-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            height: 2.5rem;
+            padding: 0 1rem;
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+        .shad-btn-primary {
+            background-color: hsl(var(--ring));
+            color: white;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .shad-btn-primary:hover { background-color: #166534; }
+        
+        .shad-btn-outline {
+            border: 1px solid hsl(var(--input));
+            background-color: transparent;
+            color: #334155;
+        }
+        .shad-btn-outline:hover { background-color: #f1f5f9; color: #0f172a; }
+        
+        /* Custom scrollbar for table */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
 </head>
-<body>
-<div class="card">
-  <h1>🚚 Kirim Resi — Admin Mocafie</h1>
-  <p class="sub">Kirim nomor resi ke customer via Email &amp; WhatsApp secara otomatis.</p>
+<body class="min-h-screen flex items-center justify-center p-4 antialiased">
 
-  <?php if (!$isAuth): ?>
-    <?php if ($error): ?><div class="alert r"><?= htmlspecialchars($error) ?></div><?php endif; ?>
-    <form method="POST">
-      <label>Password Admin</label>
-      <input type="password" name="password" required autofocus placeholder="Masukkan password">
-      <button type="submit" class="btn">🔐 Masuk</button>
-    </form>
-
-  <?php else: ?>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-      <span style="font-size:13px;color:#6b7280">Login sebagai Admin</span>
-      <form method="POST" style="margin:0"><button name="logout" class="btn-sm">Keluar ↩</button></form>
-    </div>
-
-    <?php if ($success): ?><div class="alert g"><?= htmlspecialchars($success) ?></div><?php endif; ?>
-    <?php if ($error):   ?><div class="alert r"><?= htmlspecialchars($error) ?></div><?php endif; ?>
-
-    <div class="tab">
-      <button class="tb active" onclick="showTab('form',this)">Kirim Resi</button>
-      <button class="tb" onclick="showTab('list',this)">Daftar Pesanan (<?= count($orders) ?>)</button>
-    </div>
-
-    <div id="tab-form">
-      <!-- Cari Order -->
-      <form method="GET" style="display:flex;gap:8px;margin-bottom:12px">
-        <input type="text" name="search" placeholder="Cari Order ID (MCF-...)" value="<?= htmlspecialchars($searchId) ?>" style="flex:1">
-        <button type="submit" style="padding:10px 16px;background:#2D6A2B;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">Cari</button>
-      </form>
-      <?php if ($order): ?>
-      <div class="order-box">
-        <strong>Order:</strong> <?= htmlspecialchars($order['order_id']) ?> |
-        <strong>Customer:</strong> <?= htmlspecialchars($order['name']) ?><br>
-        <strong>Email:</strong> <?= htmlspecialchars($order['email']) ?> |
-        <strong>WA:</strong> <?= htmlspecialchars($order['phone']) ?><br>
-        <strong>Total:</strong> Rp <?= number_format($order['amount'], 0, ',', '.') ?>
-        <?php if ($order['resi']): ?> | <strong>Resi lama:</strong> <?= htmlspecialchars($order['resi']) ?><?php endif; ?>
-      </div>
-      <?php endif; ?>
-
-      <form method="POST">
-        <label>Order ID *</label>
-        <input type="text" name="order_id" required placeholder="MCF-1234567890-123" value="<?= htmlspecialchars($order['order_id'] ?? $searchId) ?>">
-        <label>Nomor Resi *</label>
-        <input type="text" name="resi_number" required placeholder="00000000000000">
-        <label>Kurir</label>
-        <select name="courier">
-          <option>JNE</option><option>JNE Kargo JTR</option>
-          <option>J&amp;T Express</option><option>SiCepat</option>
-          <option>Anteraja</option><option>Pos Indonesia</option>
-        </select>
-        <?php if (!$order): ?>
-        <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:10px;margin-top:14px;font-size:12px;color:#92400e">
-          ℹ️ Order tidak ditemukan di database. Isi email/WA customer manual:
+<div class="w-full max-w-2xl">
+    
+    <!-- Branding Header -->
+    <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary-100 text-primary-700 mb-4 shadow-sm">
+            <span class="iconify text-2xl" data-icon="lucide:package-check"></span>
         </div>
-        <label>Email Customer (Manual)</label>
-        <input type="email" name="manual_email" placeholder="customer@email.com">
-        <label>No. WA Customer (Manual)</label>
-        <input type="text" name="manual_phone" placeholder="08xxxxxxxxxx">
-        <?php endif; ?>
-        <button type="submit" name="send_resi" class="btn">📦 Kirim Notifikasi Resi</button>
-      </form>
+        <h1 class="text-2xl font-semibold tracking-tight text-slate-900">Dashboard Resi</h1>
+        <p class="text-sm text-slate-500 mt-1">Sistem Logistik & Notifikasi Otomatis Mocafie</p>
     </div>
 
-    <div id="tab-list" style="display:none">
-      <?php if (empty($orders)): ?>
-        <p style="color:#6b7280;text-align:center;padding:24px">Belum ada pesanan tercatat.</p>
-      <?php else: ?>
-      <table><thead><tr><th>Order ID</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead><tbody>
-      <?php foreach (array_reverse($orders) as $o): ?>
-      <tr>
-        <td><a href="?search=<?= urlencode($o['order_id']) ?>" style="color:#2D6A2B;font-weight:600"><?= htmlspecialchars($o['order_id']) ?></a></td>
-        <td><?= htmlspecialchars($o['name']) ?></td>
-        <td>Rp <?= number_format($o['amount'],0,',','.') ?></td>
-        <td><?= $o['resi'] ? '<span class="badge bg">✅ Resi Terkirim</span>' : '<span class="badge by">⏳ Belum Resi</span>' ?></td>
-      </tr>
-      <?php endforeach; ?>
-      </tbody></table>
-      <?php endif; ?>
+    <div class="shad-card overflow-hidden">
+        
+        <?php if (!$isAuth): ?>
+        <!-- ================= LOGIN SCREEN ================= -->
+        <div class="p-6 sm:p-8">
+            <h2 class="text-lg font-semibold text-slate-900 mb-1">Login Diperlukan</h2>
+            <p class="text-sm text-slate-500 mb-6">Masukkan password admin untuk mengakses sistem pengiriman resi.</p>
+            
+            <?php if ($error): ?>
+                <div class="mb-6 p-4 rounded-md bg-red-50 border border-red-200 flex items-start text-red-800 text-sm">
+                    <span class="iconify text-red-500 mr-2 shrink-0 h-4 w-4 mt-0.5" data-icon="lucide:alert-circle"></span>
+                    <span><?= htmlspecialchars($error) ?></span>
+                </div>
+            <?php endif; ?>
+
+            <form method="POST" class="space-y-5">
+                <div>
+                    <label class="shad-label">Password Admin</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                            <span class="iconify w-4 h-4" data-icon="lucide:lock"></span>
+                        </span>
+                        <input type="password" name="password" required autofocus placeholder="••••••••" class="shad-input pl-9">
+                    </div>
+                </div>
+                <button type="submit" class="shad-btn shad-btn-primary w-full">
+                    Masuk
+                </button>
+            </form>
+        </div>
+
+        <?php else: ?>
+        <!-- ================= DASHBOARD SCREEN ================= -->
+        
+        <!-- Header Actions -->
+        <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-500 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-primary-500"></span>
+                </span>
+                <span class="text-xs font-medium text-slate-600 uppercase tracking-wider">Sistem Aktif</span>
+            </div>
+            
+            <form method="POST" class="m-0">
+                <button name="logout" class="shad-btn shad-btn-outline h-8 text-xs px-3 w-full sm:w-auto">
+                    <span class="iconify mr-1.5" data-icon="lucide:log-out"></span> Keluar
+                </button>
+            </form>
+        </div>
+
+        <div class="p-6 sm:p-8">
+            <!-- Notifications -->
+            <?php if ($success): ?>
+                <div class="mb-6 p-4 rounded-md bg-green-50 border border-green-200 flex items-start text-green-800 text-sm">
+                    <span class="iconify text-green-500 mr-2 shrink-0 h-4 w-4 mt-0.5" data-icon="lucide:check-circle-2"></span>
+                    <span><?= htmlspecialchars($success) ?></span>
+                </div>
+            <?php endif; ?>
+            <?php if ($error): ?>
+                <div class="mb-6 p-4 rounded-md bg-red-50 border border-red-200 flex items-start text-red-800 text-sm">
+                    <span class="iconify text-red-500 mr-2 shrink-0 h-4 w-4 mt-0.5" data-icon="lucide:alert-circle"></span>
+                    <span><?= htmlspecialchars($error) ?></span>
+                </div>
+            <?php endif; ?>
+
+            <!-- Tabs Navigation -->
+            <div class="inline-flex h-10 items-center justify-center rounded-md bg-slate-100 p-1 text-slate-500 mb-8 w-full sm:w-auto">
+                <button class="tab-btn active inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 w-1/2 sm:w-auto" onclick="showTab('form', this)">
+                    <span class="iconify mr-2" data-icon="lucide:send"></span> Kirim Resi
+                </button>
+                <button class="tab-btn inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 w-1/2 sm:w-auto" onclick="showTab('list', this)">
+                    <span class="iconify mr-2" data-icon="lucide:list-ordered"></span> Pesanan (<?= count($orders) ?>)
+                </button>
+            </div>
+
+            <!-- Tab: FORM (Dispatch) -->
+            <div id="tab-form" class="space-y-6">
+                <!-- Search Box -->
+                <div class="p-4 bg-slate-50 border border-slate-100 rounded-lg">
+                    <h3 class="text-sm font-medium text-slate-800 mb-3 flex items-center">
+                        <span class="iconify mr-1.5 text-slate-400" data-icon="lucide:search"></span> Cari Data Pesanan
+                    </h3>
+                    <form method="GET" class="flex flex-col sm:flex-row gap-3">
+                        <div class="relative flex-1">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                                <span class="iconify w-4 h-4" data-icon="lucide:hash"></span>
+                            </span>
+                            <input type="text" name="search" placeholder="Masukkan ID Pesanan (mis. MCF-...)" value="<?= htmlspecialchars($searchId) ?>" class="shad-input pl-9 bg-white">
+                        </div>
+                        <button type="submit" class="shad-btn shad-btn-outline shrink-0">Cari Pesanan</button>
+                    </form>
+                </div>
+
+                <!-- Order Details Card -->
+                <?php if ($order): ?>
+                <div class="border border-slate-200 rounded-lg p-5 shadow-sm">
+                    <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-100">
+                        <div>
+                            <p class="text-xs font-semibold tracking-wider text-slate-500 uppercase">ID Pesanan</p>
+                            <p class="text-sm font-medium text-slate-900 font-mono mt-0.5"><?= htmlspecialchars($order['order_id']) ?></p>
+                        </div>
+                        <div class="text-right">
+                            <span class="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20"> Lunas </span>
+                            <p class="text-sm font-semibold text-slate-900 mt-1">Rp <?= number_format($order['amount'], 0, ',', '.') ?></p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div class="flex items-start">
+                            <span class="iconify text-slate-400 mt-0.5 mr-2 shrink-0" data-icon="lucide:user"></span>
+                            <div>
+                                <p class="font-medium text-slate-700"><?= htmlspecialchars($order['name']) ?></p>
+                                <p class="text-slate-500"><?= htmlspecialchars($order['email']) ?></p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="iconify text-slate-400 mt-0.5 mr-2 shrink-0" data-icon="lucide:phone"></span>
+                            <div>
+                                <p class="text-slate-700"><?= htmlspecialchars($order['phone']) ?></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <?php if ($order['resi']): ?>
+                        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center text-sm">
+                            <span class="iconify text-amber-500 mr-2" data-icon="lucide:info"></span>
+                            <span class="text-slate-600">Resi Saat Ini: <strong class="text-slate-900"><?= htmlspecialchars($order['resi']) ?></strong> (<?= htmlspecialchars($order['courier']) ?>)</span>
+                        </div>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
+
+                <!-- Dispatch Form -->
+                <form method="POST" class="space-y-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="md:col-span-2">
+                            <label class="shad-label">ID Pesanan <span class="text-red-500">*</span></label>
+                            <input type="text" name="order_id" required placeholder="MCF-XXX" value="<?= htmlspecialchars($order['order_id'] ?? $searchId) ?>" class="shad-input font-mono">
+                        </div>
+                        
+                        <div>
+                            <label class="shad-label">Nomor Resi <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                                    <span class="iconify w-4 h-4" data-icon="lucide:barcode"></span>
+                                </span>
+                                <input type="text" name="resi_number" required placeholder="mis. 100029381920" class="shad-input pl-9 font-mono font-medium">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="shad-label">Jasa Kurir</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                                    <span class="iconify w-4 h-4" data-icon="lucide:truck"></span>
+                                </span>
+                                <select name="courier" class="shad-input pl-9 appearance-none">
+                                    <option>JNE</option>
+                                    <option>JNE Kargo JTR</option>
+                                    <option>J&T Express</option>
+                                    <option>SiCepat</option>
+                                    <option>Anteraja</option>
+                                    <option>Pos Indonesia</option>
+                                    <option>Wahana</option>
+                                    <option>Ninja Xpress</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500">
+                                    <span class="iconify w-4 h-4" data-icon="lucide:chevron-down"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <?php if (!$order): ?>
+                    <div class="rounded-md border border-amber-200 bg-amber-50 p-4 mt-6">
+                        <div class="flex">
+                            <div class="shrink-0">
+                                <span class="iconify h-5 w-5 text-amber-500" data-icon="lucide:triangle-alert"></span>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-amber-800">Pesanan belum masuk database!</h3>
+                                <div class="mt-2 text-sm text-amber-700">
+                                    <p>Tolong masukkan data nomor dan email pelanggan secara manual agar sistem bisa mengirim WA/Email.</p>
+                                </div>
+                                <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                     <div>
+                                        <label class="block text-xs font-semibold text-amber-900 mb-1">Email Pelanggan</label>
+                                        <input type="email" name="manual_email" placeholder="contoh@gmail.com" class="shad-input bg-white/50 border-amber-300 h-8 text-xs">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-amber-900 mb-1">Nomor WhatsApp</label>
+                                        <input type="text" name="manual_phone" placeholder="08xxxxxxxxxx" class="shad-input bg-white/50 border-amber-300 h-8 text-xs">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+
+                    <div class="pt-2">
+                        <button type="submit" name="send_resi" class="shad-btn shad-btn-primary w-full shadow-sm hover:shadow transition-shadow">
+                            <span class="iconify mr-2 h-4 w-4" data-icon="lucide:bell-ring"></span>
+                            Kirim Notifikasi Resi (Email & WA)
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Tab: LIST (Orders) -->
+            <div id="tab-list" class="hidden">
+                <div class="border rounded-md overflow-hidden">
+                    <div class="overflow-x-auto max-h-[500px]">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-slate-500 uppercase bg-slate-50 sticky top-0 z-10 shadow-sm">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 font-medium">ID Pesanan</th>
+                                    <th scope="col" class="px-6 py-3 font-medium">Pelanggan</th>
+                                    <th scope="col" class="px-6 py-3 font-medium whitespace-nowrap">Total Tagihan</th>
+                                    <th scope="col" class="px-6 py-3 font-medium">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                <?php if (empty($orders)): ?>
+                                <tr>
+                                    <td colspan="4" class="px-6 py-8 text-center text-slate-500">
+                                        <div class="flex flex-col items-center justify-center">
+                                            <span class="iconify h-8 w-8 text-slate-300 mb-2" data-icon="lucide:inbox"></span>
+                                            <p>Belum ada riwayat pesanan.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <?php else: ?>
+                                    <?php foreach (array_reverse($orders) as $o): ?>
+                                    <tr class="bg-white hover:bg-slate-50 transition-colors">
+                                        <td class="px-6 py-4 font-mono font-medium text-primary-700">
+                                            <a href="?search=<?= urlencode($o['order_id']) ?>" class="hover:underline flex items-center">
+                                                <?= htmlspecialchars($o['order_id']) ?>
+                                                <span class="iconify ml-1 w-3 h-3 text-slate-400" data-icon="lucide:external-link"></span>
+                                            </a>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <p class="font-medium text-slate-900"><?= htmlspecialchars($o['name']) ?></p>
+                                        </td>
+                                        <td class="px-6 py-4 text-slate-600 whitespace-nowrap">
+                                            Rp <?= number_format($o['amount'], 0, ',', '.') ?>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <?php if ($o['resi']): ?>
+                                                <span class="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20 whitespace-nowrap">
+                                                    <span class="iconify w-3 h-3" data-icon="lucide:check"></span> Terkirim
+                                                </span>
+                                            <?php else: ?>
+                                                <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20 whitespace-nowrap">
+                                                    <span class="iconify w-3 h-3" data-icon="lucide:clock"></span> Menunggu Resi
+                                                </span>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <?php endif; ?>
+        
     </div>
-  <?php endif; ?>
+    
+    <!-- Footer -->
+    <div class="text-center mt-6 text-xs text-slate-400">
+        &copy; <?= date('Y') ?> Mocafie. Sistem didukung oleh PHP & Fonnte WhatsApp API.
+    </div>
 </div>
+
 <script>
-function showTab(n,b){
-  ['form','list'].forEach(t=>document.getElementById('tab-'+t).style.display=t===n?'block':'none');
-  document.querySelectorAll('.tb').forEach(e=>e.classList.remove('active'));
-  b.classList.add('active');
+// Styling helper for the custom tabs
+document.head.insertAdjacentHTML("beforeend", `
+<style>
+.tab-btn.active { background-color: white; color: #0f172a; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+</style>
+`);
+
+function showTab(tabName, btnElement) {
+    // Hide all tab panes
+    document.getElementById('tab-form').classList.add('hidden');
+    document.getElementById('tab-list').classList.add('hidden');
+    
+    // Remove active class from all buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    
+    // Show the selected pane & activate button
+    document.getElementById('tab-' + tabName).classList.remove('hidden');
+    btnElement.classList.add('active');
 }
 </script>
-</body></html>
+</body>
+</html>

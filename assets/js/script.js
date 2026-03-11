@@ -442,8 +442,6 @@ document.addEventListener("DOMContentLoaded", () => {
 // Fungsi didefinisikan di global scope menggunakan function declarations.
 // DOM element diambil saat dipanggil (lazy) - tidak bergantung pada timing apapun.
 
-const _CO_API = "https://www.emsifa.com/api-wilayah-indonesia/api";
-
 let currentTotalProduk = 0;
 let currentOngkir = 0;
 
