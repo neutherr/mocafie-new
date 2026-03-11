@@ -15,7 +15,7 @@ checkRateLimit('checkout', 5, 60); // Maks 5 kali checkout per IP per menit
 const PRODUCT_CATALOG = [
     'PRD-1KG' => [
         'name'   => 'Tepung Mocafie Serbaguna 1kg',
-        'price'  => 25000,   // Rp 25.000
+        'price'  => 2000,    // TEST PRICE - Ubah kembali ke 25000 setelah testing selesai!
         'weight' => 1000,    // gram
     ],
     // Tambahkan produk baru di sini jika ada
