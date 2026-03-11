@@ -603,8 +603,9 @@ async function cekOngkir() {
     kurirSelect.innerHTML = `<option value="">Memuat layanan kurir (${totalWeight / 1000} Kg)...</option>`;
     kurirSelect.disabled = true;
 
-    // ID Kota Pengirim Komerce sesuai pengaturan (16519)
-    const originKota = 16519;
+    // ID Kecamatan/Kelurahan Pengirim dari Komerce API
+    // BEDAHAN, SAWANGAN, DEPOK, JAWA BARAT, 16519 → ID Komerce: 25969
+    const originKota = 25969;
 
     try {
         const response = await fetch('api/rajaongkir_cost.php', {
