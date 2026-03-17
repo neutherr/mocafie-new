@@ -73,8 +73,8 @@
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"></noscript>
 
-    <!-- TailwindCSS CDN (harus synchronous untuk config, ini keterbatasan CDN mode) -->
-    <link rel="stylesheet" href="assets/css/style.css">
+    <!-- TailwindCSS Local Build -->
+    <link rel="stylesheet" href="assets/css/style.css?v=<?= filemtime('assets/css/style.css') ?>">
     <!-- Iconify: defer agar tidak memblokir render -->
     <script src="https://code.iconify.design/3/3.1.0/iconify.min.js" defer></script>
     
