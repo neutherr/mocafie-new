@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+}
+
+@layer components {
+    /* Custom image placeholder styles */
+    .img-placeholder-container {
+        @apply relative bg-gray-100 flex items-center justify-center overflow-hidden;
+        background-image: linear-gradient(135deg, #e5e7eb 25%, transparent 25%), 
+                          linear-gradient(225deg, #e5e7eb 25%, transparent 25%), 
+                          linear-gradient(45deg, #e5e7eb 25%, transparent 25%), 
+                          linear-gradient(315deg, #e5e7eb 25%, transparent 25%);
+        background-position: 10px 0, 10px 0, 0 0, 0 0;
+        background-size: 20px 20px;
+        background-repeat: repeat;
+    }
+    
+    .img-placeholder-text {
+        @apply absolute inset-0 flex items-center justify-center text-white text-sm text-center p-4 opacity-0 transition-opacity duration-300 z-10;
+        background: rgba(45, 90, 39, 0.8); /* Primary color with opacity */
+    }
+
+    .img-placeholder-container:hover .img-placeholder-text, 
+    .img-missing .img-placeholder-text {
+        @apply opacity-100;
+    }
+
+    /* Show placeholder text if image fails to load (simulated with class) */
+    img:not([src]), img[src=""] {
+        display: none;
+    }
+    
+    /* ===== Scroll Reveal Animations ===== */
+    .animate-on-scroll {
+        opacity: 0;
+        transform: translateY(24px);
+        /* Snappier ease-out: fast start, smooth settle */
+        transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+                    transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        /* GPU compositing hint */
+        will-change: opacity, transform;
+    }
+
+    .animate-on-scroll.appear {
+        opacity: 1;
+        transform: translateY(0);
+        will-change: auto; /* release after animation settles */
+    }
+
+    /* Directional variants */
+    .anim-from-left  { transform: translateX(-32px); }
+    .anim-from-right { transform: translateX( 32px); }
+    .anim-from-left.appear,
+    .anim-from-right.appear { transform: translateX(0); }
+
+    /* Scale-in variant (good for cards/badges) */
+    .anim-scale-in { transform: scale(0.92) translateY(16px); }
+    .anim-scale-in.appear { transform: scale(1) translateY(0); }
+
+    /* Stagger delays */
+    .delay-100 { transition-delay:  80ms; }
+    .delay-200 { transition-delay: 160ms; }
+    .delay-300 { transition-delay: 240ms; }
+    .delay-400 { transition-delay: 320ms; }
+    .delay-500 { transition-delay: 400ms; }
+
+    /* Respect reduced-motion preference */
+    @media (prefers-reduced-motion: reduce) {
+        .animate-on-scroll,
+        .anim-from-left,
+        .anim-from-right,
+        .anim-scale-in {
+            opacity: 1 !important;
+            transform: none !important;
+            transition: none !important;
+            will-change: auto !important;
+        }
+    }
+
+
+    .gallery-item {
+        /* Width handled by Tailwind utility now */
+        flex-shrink: 0;
+        border-radius: 1rem;
+        overflow: hidden;
+        position: relative;
+    }
+}
