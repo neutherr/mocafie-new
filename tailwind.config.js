@@ -4,6 +4,7 @@ module.exports = {
     "./*.{html,php,js}",
     "./partials/**/*.{html,php,js}",
     "./sections/**/*.{html,php,js}",
+    "./assets/**/*.js",
   ],
   theme: {
     extend: {
