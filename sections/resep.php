@@ -91,7 +91,7 @@
                 <button id="rsPrev" aria-label="Resep Sebelumnya" class="w-12 h-12 rounded-full border border-gray-200 hover:bg-gray-100 flex items-center justify-center transition-colors text-gray-500 focus:outline-none">
                     <span class="iconify text-2xl" data-icon="mdi:arrow-left"></span>
                 </button>
-                <div class="flex gap-3" id="rsDots">
+                <div class="flex items-center gap-3" id="rsDots" style="gap: 12px;">
                 </div>
                 <button id="rsNext" aria-label="Resep Berikutnya" class="w-12 h-12 rounded-full bg-primary text-white hover:bg-green-800 flex items-center justify-center transition-colors shadow-lg shadow-primary/20 focus:outline-none">
                     <span class="iconify text-2xl" data-icon="mdi:arrow-right"></span>

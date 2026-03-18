@@ -167,7 +167,7 @@
       </div>
 
       <!-- Dots -->
-      <div id="galleryDots" class="flex items-center justify-center gap-2 mt-6"></div>
+      <div id="galleryDots" class="flex items-center justify-center gap-3 mt-10 py-2" style="margin-top: 2rem;"></div>
     </div>
   </div>
 </section>

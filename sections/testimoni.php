@@ -80,7 +80,7 @@
                 <button id="tsPrev" aria-label="Testimoni Sebelumnya" class="w-12 h-12 rounded-full border border-gray-200 hover:bg-gray-100 flex items-center justify-center transition-colors text-gray-500 focus:outline-none">
                     <span class="iconify text-2xl" data-icon="mdi:arrow-left"></span>
                 </button>
-                <div class="flex gap-3" id="tsDots">
+                <div class="flex items-center gap-3" id="tsDots" style="gap: 12px;">
                 </div>
                 <button id="tsNext" aria-label="Testimoni Berikutnya" class="w-12 h-12 rounded-full bg-primary text-white hover:bg-green-800 flex items-center justify-center transition-colors shadow-lg shadow-primary/20 focus:outline-none">
                     <span class="iconify text-2xl" data-icon="mdi:arrow-right"></span>

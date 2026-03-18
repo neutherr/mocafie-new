@@ -36,6 +36,30 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".animate-on-scroll").forEach((el) => observer.observe(el));
 
 
+    // ===== Shared Dot Style Helper =====
+    const applyDotStyle = (el, isActive) => {
+        el.style.display = "inline-block";
+        el.style.borderRadius = "9999px";
+        el.style.cursor = "pointer";
+        el.style.border = "none";
+        el.style.outline = "none";
+        el.style.padding = "0";
+        el.style.transition = "all 0.3s ease";
+        if (isActive) {
+            el.style.width = "14px";
+            el.style.height = "14px";
+            el.style.backgroundColor = "#2d5a27"; // primary color
+            el.style.transform = "scale(1.1)";
+            el.style.boxShadow = "0 1px 3px rgba(45,90,39,0.4)";
+        } else {
+            el.style.width = "10px";
+            el.style.height = "10px";
+            el.style.backgroundColor = "#d1d5db"; // gray-300
+            el.style.transform = "scale(1)";
+            el.style.boxShadow = "none";
+        }
+    };
+
     // ===== Gallery Slider Only (PAKAI INI SAJA) =====
     const viewport = document.getElementById("galleryViewport");
     const track = document.getElementById("galleryTrack");
@@ -98,11 +122,17 @@ document.addEventListener("DOMContentLoaded", () => {
         for (let i = 0; i < pages; i++) {
             const b = document.createElement("button");
             b.type = "button";
-            b.className =
-                "w-2.5 h-2.5 p-3 box-content bg-clip-content rounded-full transition-all " +
-                (i === pageIndex ? "bg-primary scale-110" : "bg-gray-300 hover:bg-gray-400");
+            applyDotStyle(b, i === pageIndex);
             b.setAttribute("aria-label", `Ke slide ${i + 1}`);
             if (i === pageIndex) b.setAttribute("aria-current", "true");
+
+            // Hover effect for inactive dots
+            b.addEventListener("mouseenter", () => {
+                if (i !== pageIndex) b.style.backgroundColor = "#9ca3af"; // gray-400
+            });
+            b.addEventListener("mouseleave", () => {
+                if (i !== pageIndex) b.style.backgroundColor = "#d1d5db"; // gray-300
+            });
 
             b.addEventListener("click", () => {
                 stopAutoplay();
@@ -116,9 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const updateDots = () => {
         Array.from(dotsWrap.children).forEach((d, i) => {
-            d.className =
-                "w-2.5 h-2.5 p-3 box-content bg-clip-content rounded-full transition-all " +
-                (i === pageIndex ? "bg-primary scale-110" : "bg-gray-300 hover:bg-gray-400");
+            applyDotStyle(d, i === pageIndex);
             if (i === pageIndex) d.setAttribute("aria-current", "true");
             else d.removeAttribute("aria-current");
         });
@@ -283,8 +311,15 @@ document.addEventListener("DOMContentLoaded", () => {
         // Create dots
         tsDotsWrap.innerHTML = "";
         tsSlides.forEach((_, i) => {
-            const dot = document.createElement("div");
-            dot.className = `w-3 h-3 p-3 box-content bg-clip-content rounded-full cursor-pointer transition-all ${i === 0 ? 'bg-primary scale-110' : 'bg-gray-300 hover:bg-gray-400'}`;
+            const dot = document.createElement("button");
+            dot.type = "button";
+            applyDotStyle(dot, i === 0);
+            dot.addEventListener("mouseenter", () => {
+                if (i !== tsCurrentIndex) dot.style.backgroundColor = "#9ca3af";
+            });
+            dot.addEventListener("mouseleave", () => {
+                if (i !== tsCurrentIndex) dot.style.backgroundColor = "#d1d5db";
+            });
             dot.addEventListener("click", () => {
                 tsCurrentIndex = i;
                 updateTsSlider();
@@ -309,11 +344,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const updateTsDots = () => {
             Array.from(tsDotsWrap.children).forEach((dot, i) => {
-                if (i === tsCurrentIndex) {
-                    dot.className = "w-3 h-3 p-3 box-content bg-clip-content rounded-full bg-primary scale-110 transition-all cursor-pointer";
-                } else {
-                    dot.className = "w-3 h-3 p-3 box-content bg-clip-content rounded-full bg-gray-300 hover:bg-gray-400 cursor-pointer transition-all";
-                }
+                applyDotStyle(dot, i === tsCurrentIndex);
             });
         }
 
@@ -366,8 +397,15 @@ document.addEventListener("DOMContentLoaded", () => {
         // Create dots
         rsDotsWrap.innerHTML = "";
         rsSlides.forEach((_, i) => {
-            const dot = document.createElement("div");
-            dot.className = `w-3 h-3 p-3 box-content bg-clip-content rounded-full cursor-pointer transition-all ${i === 0 ? 'bg-primary scale-110' : 'bg-gray-300 hover:bg-gray-400'}`;
+            const dot = document.createElement("button");
+            dot.type = "button";
+            applyDotStyle(dot, i === 0);
+            dot.addEventListener("mouseenter", () => {
+                if (i !== rsCurrentIndex) dot.style.backgroundColor = "#9ca3af";
+            });
+            dot.addEventListener("mouseleave", () => {
+                if (i !== rsCurrentIndex) dot.style.backgroundColor = "#d1d5db";
+            });
             dot.addEventListener("click", () => {
                 rsCurrentIndex = i;
                 updateRsSlider();
@@ -392,11 +430,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const updateRsDots = () => {
             Array.from(rsDotsWrap.children).forEach((dot, i) => {
-                if (i === rsCurrentIndex) {
-                    dot.className = "w-3 h-3 p-3 box-content bg-clip-content rounded-full bg-primary scale-110 transition-all cursor-pointer";
-                } else {
-                    dot.className = "w-3 h-3 p-3 box-content bg-clip-content rounded-full bg-gray-300 hover:bg-gray-400 cursor-pointer transition-all";
-                }
+                applyDotStyle(dot, i === rsCurrentIndex);
             });
         }
 
